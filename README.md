@@ -13,7 +13,7 @@ This is the initial skeleton only: the folders, the app factory and its settings
 
 ## Where code goes
 
-Each feature folder holds `routes.py`, `service.py`, `models.py` and `schemas.py`.
+Each feature folder holds `routes.py`, `service.py`, `models.py` and `schemas.py`. `reports` has no `models.py` because its numbers are calculated, and `health` has only `routes.py`.
 
 | Folder | What goes there |
 |---|---|
@@ -26,7 +26,7 @@ Each feature folder holds `routes.py`, `service.py`, `models.py` and `schemas.py
 | `api/app/audit/` | Who changed what, and when |
 | `api/app/health/` | Health check and API docs |
 | `api/app/common/` | Shared helpers: staff permissions (401/403) and JSON errors |
-| `api/app/ai/` | AI adapter: a Fake version now, a Real one optionally |
+| `api/ai_adapter/` | AI adapter, outside the Flask app: a Fake version now, a Real one optionally |
 | `api/migrations/` | Database migrations (Flask-Migrate) |
 | `web/` | Django UI, from the tutor's starter project |
 | `evaluation/` | AI evaluation runner and test cases |
