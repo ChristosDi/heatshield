@@ -38,3 +38,13 @@ Each feature folder holds `routes.py`, `service.py`, `models.py` and `schemas.py
 - The AI adapter only makes suggestions. It has no database access, and it is sent the request description only, never resident details.
 - Use fictional data only.
 - Add the tutor's starter project in one commit labelled as supplied code, so it stays separate from our own work.
+
+## Running the tests
+
+From the `api` folder, with the virtual environment active:
+
+```
+python -m pytest
+```
+
+Tests use an in-memory database and fictional data only, so they need no `.env`, no network and no local database.
