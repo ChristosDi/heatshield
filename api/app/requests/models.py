@@ -36,7 +36,7 @@ class SupportRequest(db.Model):
 
     area = db.Column(
         db.Text,
-        nullable=False
+        nullable=True
     )
 
     created_at = db.Column(

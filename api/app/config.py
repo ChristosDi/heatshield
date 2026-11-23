@@ -11,3 +11,5 @@ class Config:
     API_TITLE = "HeatShield API"
     API_VERSION = "v1"
     OPENAPI_VERSION = "3.0.3"
+    
+    PROPAGATE_VALIDATION_ERROR = False
