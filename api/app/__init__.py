@@ -1,8 +1,11 @@
 """HeatShield Flask API: the application factory."""
 from flask import Flask
+from flask_smorest import Api
 
 from .config import Config
 from .extensions import api, db, migrate
+from .requests.routes import blp as requests_blp
+from .common.errors import register_error_handlers
 
 
 def create_app(test_config=None):
@@ -25,8 +28,14 @@ def create_app(test_config=None):
     from .requests import models as _requests  # noqa: F401
     from .triage import models as _triage  # noqa: F401
 
+    # Register error handlers
+    register_error_handlers(app)
+
+
     # Register each feature's blueprint here when its first route is added, for example:
     #     from .requests.routes import blp as requests_blp
     #     api.register_blueprint(requests_blp)
+    api.register_blueprint(requests_blp)
+    
 
     return app
