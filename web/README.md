@@ -41,14 +41,13 @@ From `web/`:
 ```
 python -m pytest
 ```
-The tests use their own settings (`config/test_settings.py`), so they need no `.env`.
+The tests use their own settings (`config/test_settings.py`), so they need no `.env`. Each app keeps its tests in its own `tests/` folder, next to the code they check, for example `staff/tests/test_sign_in.py`. Test files must be named `test_*.py`.
 
 ## Where code goes
 
 | Folder | What goes there |
 |---|---|
-| `config/` | Settings and the main URL list |
-| `staff/` | Sign-in and staff roles |
-| `dashboard/` | Dashboard pages |
-| `templates/` | Shared templates: `base.html` and the sign-in page |
-| `tests/` | Tests for the Django UI |
+| `config/` | Settings, test settings and the main URL list |
+| `staff/` | Sign-in and staff roles, with their tests in `staff/tests/` |
+| `dashboard/` | Dashboard pages, with their templates in `dashboard/templates/dashboard/` and their tests in `dashboard/tests/` |
+| `templates/` | Shared templates: `base.html` and the sign-in page (`registration/login.html`) |
