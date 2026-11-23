@@ -1,5 +1,6 @@
 """HeatShield Flask API: the application factory."""
 from flask import Flask
+from flask_smorest import Api
 
 from .config import Config
 from .extensions import api, db, migrate
