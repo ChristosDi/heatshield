@@ -27,7 +27,8 @@ def create_app(test_config=None):
     from .escalations import models as _escalations  # noqa: F401
     from .requests import models as _requests  # noqa: F401
     from .triage import models as _triage  # noqa: F401
-
+    from .bookings import models as _bookings
+    
     # Register error handlers
     register_error_handlers(app)
 
