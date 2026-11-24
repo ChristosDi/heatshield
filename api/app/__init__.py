@@ -5,6 +5,7 @@ from flask_smorest import Api
 from .config import Config
 from .extensions import api, db, migrate
 from .requests.routes import blp as requests_blp
+from .bookings.routes import blp as bookings_blp
 from .common.errors import register_error_handlers
 
 
@@ -27,7 +28,8 @@ def create_app(test_config=None):
     from .escalations import models as _escalations  # noqa: F401
     from .requests import models as _requests  # noqa: F401
     from .triage import models as _triage  # noqa: F401
-
+    from .bookings import models as _bookings
+    
     # Register error handlers
     register_error_handlers(app)
 
@@ -36,6 +38,7 @@ def create_app(test_config=None):
     #     from .requests.routes import blp as requests_blp
     #     api.register_blueprint(requests_blp)
     api.register_blueprint(requests_blp)
+    api.register_blueprint(bookings_blp)
     
 
     return app
