@@ -1,0 +1,29 @@
+/* Dashboard counts: one card per number. The cards wrap onto new rows on narrow screens. */
+.counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+}
+
+.count {
+  border: 1px solid #999;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.count dt {
+  font-weight: bold;
+}
+
+.count dd {
+  margin: 0.25rem 0 0;
+  font-size: 2rem;
+}
+
+.notice {
+  border: 1px solid #b00020;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
