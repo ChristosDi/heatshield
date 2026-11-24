@@ -1,5 +1,8 @@
 """Support request rules. This is the only place they live."""
+from sqlalchemy import func
+
 from ..extensions import db
+from .constants import STATUSES
 from .models import SupportRequest
 
 
@@ -59,3 +62,20 @@ def update_request(support_request, data):
 def delete_request(request): 
     db.session.delete(request)
     db.session.commit()
+
+
+
+def count_by_status():
+    """Count the stored requests in each status, for example {"pending": 2, "completed": 3, ...}.
+
+    The database does the counting in one query. A status with no requests counts as 0.
+    """
+    rows = db.session.execute(
+        db.select(SupportRequest.status, func.count(SupportRequest.id))
+        .group_by(SupportRequest.status)
+    ).all()
+
+    counts = dict.fromkeys(STATUSES, 0)
+    counts.update(dict(rows))
+
+    return counts
