@@ -1,6 +1,23 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
+{% endblock %}
 
 {% block content %}
   <h1>HeatShield dashboard</h1>
   <p>Role: {{ role|default:"no role yet - ask an administrator" }}</p>
+
+  <h2>Support requests</h2>
+  {% if counts %}
+    <dl class="counts">
+      <div class="count"><dt>Outstanding</dt><dd>{{ counts.outstanding }}</dd></div>
+      <div class="count"><dt>Completed</dt><dd>{{ counts.completed }}</dd></div>
+      <div class="count"><dt>Rejected</dt><dd>{{ counts.rejected }}</dd></div>
+      <div class="count"><dt>Total</dt><dd>{{ counts.total }}</dd></div>
+    </dl>
+  {% else %}
+    <p class="notice">The request counts can't be loaded right now. Check that the Flask API is running, then refresh the page.</p>
+  {% endif %}
 {% endblock %}

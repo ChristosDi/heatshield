@@ -5,6 +5,7 @@ from flask_smorest import Api
 from .config import Config
 from .extensions import api, db, migrate
 from .requests.routes import blp as requests_blp
+from .reports.routes import blp as reports_blp
 from .common.errors import register_error_handlers
 
 
@@ -36,6 +37,6 @@ def create_app(test_config=None):
     #     from .requests.routes import blp as requests_blp
     #     api.register_blueprint(requests_blp)
     api.register_blueprint(requests_blp)
-    
+    api.register_blueprint(reports_blp)
 
     return app
