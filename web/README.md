@@ -25,11 +25,21 @@ From the repository root, with the virtual environment active (on macOS or Linux
 
 ## Run
 
-From `web/`:
-```
-python manage.py runserver
-```
-Open http://127.0.0.1:8000/ and sign in. Manage staff accounts and roles at http://127.0.0.1:8000/admin/.
+The dashboard gets its numbers from the Flask API, so run both servers, each in its own terminal with the virtual environment active.
+
+1. The Flask API, from `api/`:
+   ```
+   flask --app run run --port 5000 --debug
+   ```
+   If port 5000 is taken on your machine, use another port, for example `--port 5001`, and set `FLASK_API_URL=http://127.0.0.1:5001` in your `.env`.
+2. Django, from `web/`:
+   ```
+   python manage.py runserver
+   ```
+
+Open http://127.0.0.1:8000/ and sign in. Manage staff accounts and roles at http://127.0.0.1:8000/admin/. If the Flask API isn't running, the home page still loads and says the counts can't be loaded.
+
+Django calls Flask only through `dashboard/api_client.py`, from the server. The browser never calls Flask directly.
 
 ## Staff roles
 
@@ -41,7 +51,7 @@ From `web/`:
 ```
 python -m pytest
 ```
-The tests use their own settings (`config/test_settings.py`), so they need no `.env`. Each app keeps its tests in its own `tests/` folder, next to the code they check, for example `staff/tests/test_sign_in.py`. Test files must be named `test_*.py`.
+The tests use their own settings (`config/test_settings.py`), so they need no `.env`.They never call the real Flask API: `conftest.py` gives every test a fake one. Each app keeps its tests in its own `tests/` folder, next to the code they check, for example `staff/tests/test_sign_in.py`. Test files must be named `test_*.py`.
 
 ## Where code goes
 

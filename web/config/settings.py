@@ -22,6 +22,11 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
+# Where Django finds the Flask API. Django calls it from the server; the browser never does.
+FLASK_API_URL = os.environ.get("FLASK_API_URL", "http://127.0.0.1:5000").rstrip("/")
+if not FLASK_API_URL.startswith(("http://", "https://")):
+    raise ImproperlyConfigured("FLASK_API_URL must start with http:// or https:// (see .env.example).")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
