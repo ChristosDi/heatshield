@@ -25,3 +25,6 @@ Thumbs.db
 # draw.io backup files
 *.bkp
 .$*
+
+# Secrets and local settings: copy .env.example to .env
+.env
