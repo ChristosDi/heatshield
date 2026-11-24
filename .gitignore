@@ -4,6 +4,7 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
+.env
 
 # Local databases: each developer builds their own from the migrations
 *.db

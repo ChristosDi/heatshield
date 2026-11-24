@@ -2,15 +2,7 @@
 """Schemas: validate booking input and shape JSON output."""
 
 from marshmallow import Schema, fields, validate
-
-
-BOOKING_STATUSES = [
-    "pending",
-    "approved",
-    "cancelled",
-    "flagged"
-]
-
+from .constants import BOOKING_STATUSES
 
 class BookingCreateSchema(Schema):
 
