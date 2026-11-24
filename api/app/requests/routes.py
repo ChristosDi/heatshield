@@ -44,7 +44,7 @@ class RequestDetail(MethodView):
     @blp.response(200, RequestResponseSchema)
     def get(self, request_id):
         """Retrieve a specific support request."""
-
+        print(request_id)
         support_request = service.get_request(request_id)
 
         if support_request is None:

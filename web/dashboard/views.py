@@ -1,8 +1,11 @@
 import logging
 
 from django.shortcuts import render
-
+from django.conf import settings
 from staff.roles import role_of
+from .api import get
+
+import requests
 
 from . import api_client
 
