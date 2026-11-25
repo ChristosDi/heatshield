@@ -1,0 +1,258 @@
+
+{% extends "base.html" %}
+
+{% block title %}Support Requests | HeatShield{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-3 px-md-5 py-4">
+
+    <!-- Page heading -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+        <div>
+            <h1 class="h3 mb-1">Support Requests</h1>
+            <p class="text-muted mb-0">
+                Search and manage heatwave support requests.
+            </p>
+        </div>
+
+        <a href="#" class="btn btn-primary">
+            + Create Support Request
+        </a>
+    </div>
+
+    <!-- Search and filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="row g-3">
+
+                    <!-- Search -->
+                    <div class="col-12 col-md-6">
+                        <label for="search" class="form-label">
+                            Search requests
+                        </label>
+
+                        <input
+                            type="text"
+                            name="search"
+                            id="search"
+                            class="form-control"
+                            placeholder="Search by request ID, resident or description..."
+                            value="{{ request.GET.search|default:'' }}"
+                        >
+                    </div>
+
+                    <!-- Category filter -->
+                    <div class="col-12 col-md-3 col-lg-2">
+                        <label for="category" class="form-label">
+                            Category
+                        </label>
+
+                        <select name="category" id="category" class="form-select">
+                            <option value="">All categories</option>
+                            {% for value, label in category_choices %}
+                                <option value="{{ value }}"
+                                    {% if request.GET.category == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Status filter -->
+                    <div class="col-12 col-md-3 col-lg-2">
+                        <label for="status" class="form-label">
+                            Status
+                        </label>
+
+                        <select name="status" id="status" class="form-select">
+                            <option value="">All statuses</option>
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}"
+                                    {% if request.GET.status == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Priority filter -->
+                    <div class="col-12 col-md-3 col-lg-2">
+                        <label for="priority" class="form-label">
+                            Priority
+                        </label>
+
+                        <select name="priority" id="priority" class="form-select">
+                            <option value="">All priorities</option>
+                            {% for value, label in priority_choices %}
+                                <option value="{{ value }}"
+                                    {% if request.GET.priority == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Area filter -->
+                    <div class="col-12 col-md-3 col-lg-2">
+                        <label for="area" class="form-label">
+                            Area
+                        </label>
+
+                        <select name="area" id="area" class="form-select">
+                            <option value="">All areas</option>
+                            {% for area in areas %}
+                                <option value="{{ area }}"
+                                    {% if request.GET.area == area %}selected{% endif %}>
+                                    {{ area }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="col-12 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            Search and Filter
+                        </button>
+
+                        <a href="{% url 'request_dashboard' %}"
+                           class="btn btn-outline-secondary">
+                            Clear filters
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Results heading -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Request List</h2>
+
+        <span class="text-muted small">
+            {{ support_requests|length }} requests shown
+        </span>
+    </div>
+
+    <!-- Requests table -->
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Request ID</th>
+                        <th scope="col">Resident</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Area</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Date Created</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in support_requests %}
+
+                        <tr>
+                            <td class="fw-semibold">
+                                {{ item.id }}
+                            </td>
+
+                            <td>
+                                {{ item.resident_name }}
+                            </td>
+
+                            <td>
+                                {{ item.category }}
+                            </td>
+
+                            <td>
+                                {{ item.area }}
+                            </td>
+
+                            <!-- Priority badge -->
+                            <td>
+                                {% if item.priority == "High" %}
+                                    <span class="badge bg-danger">
+                                        High
+                                    </span>
+                                {% elif item.priority == "Medium" %}
+                                    <span class="badge bg-warning text-dark">
+                                        Medium
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        Low
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Status badge -->
+                            <td>
+                                {% if item.status == "Open" %}
+                                    <span class="badge bg-primary">
+                                        Open
+                                    </span>
+                                {% elif item.status == "In Progress" %}
+                                    <span class="badge bg-warning text-dark">
+                                        In Progress
+                                    </span>
+                                {% elif item.status == "Resolved" %}
+                                    <span class="badge bg-success">
+                                        Resolved
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        {{ item.status }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ item.created_at|date:"d M Y" }}
+                            </td>
+
+                            <td>
+                                <a
+                                    href="{% url 'request_detail' item.id %}"
+                                    class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <h3 class="h6 text-muted">
+                                    No support requests found
+                                </h3>
+
+                                <p class="text-muted mb-0">
+                                    Try changing your search or filters.
+                                </p>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

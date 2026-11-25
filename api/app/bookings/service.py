@@ -5,9 +5,7 @@ from ..extensions import db
 from .models import Booking
 from ..requests.models import SupportRequest
 from ..centres.models import CoolingCentre
-
-
-ACTIVE_BOOKING_STATUSES = ["pending", "approved", "flagged"]
+from .constants import ACTIVE_BOOKING_STATUSES
 
 
 def get_all_bookings(filters=None):

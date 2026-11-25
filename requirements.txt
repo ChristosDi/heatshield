@@ -20,3 +20,5 @@ tzdata==2026.6; sys_platform == "win32"
 # Testing
 pytest==9.2.0
 pytest-django==4.14.0
+
+requests=2.34.2

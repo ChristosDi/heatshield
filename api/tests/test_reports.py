@@ -19,6 +19,7 @@ from app.extensions import db
 from app.reports.service import COMPLETED, OUTSTANDING, REJECTED
 from app.requests.constants import STATUSES
 from app.requests.models import SupportRequest
+from app.residents.models import Resident
 
 # The address under test. Kept in one place so a change of address means one edit here.
 COUNTS_URL = "/api/reports/request-counts"
@@ -36,13 +37,21 @@ def seeded_requests(app):
     The requests are written straight to the database (not through the API), so these tests
     only depend on the counts route, not on the create-request route working.
     """
-    for number, status in enumerate(SEEDED_STATUSES, start=1):
-        db.session.add(SupportRequest(
-            description=f"Fictional request {number}",
-            category="cooling_space",
-            status=status,
-        ))
-    db.session.commit()  # Save all 7 requests in one go.
+    with app.app_context():
+        # Create a dummy resident to satisfy the foreign key constraint
+        resident = Resident(display_name="Fictional Resident")
+        db.session.add(resident)
+        db.session.commit()
+
+        for number, status in enumerate(SEEDED_STATUSES, start=1):
+            db.session.add(SupportRequest(
+                reference=f"REQ-{number:03d}",
+                description=f"Fictional request {number}",
+                category="cooling_space",
+                status=status,
+                resident_id=resident.id,
+            ))
+        db.session.commit()  # Save all 7 requests in one go.
 
 
 def test_counts_are_zero_when_there_are_no_requests(client):
@@ -70,10 +79,21 @@ def test_counts_match_the_seeded_requests(client, seeded_requests):
     assert response.get_json() == {"outstanding": 3, "completed": 3, "rejected": 1, "total": 7}
 
 
-def test_counts_change_when_a_status_changes(client):
+def test_counts_change_when_a_status_changes(client, app):
     """Completing a request moves it from outstanding to completed straight away."""
+    with app.app_context():
+        resident = Resident(display_name="Test Resident")
+        db.session.add(resident)
+        db.session.commit()
+        resident_id = resident.id
+
     # Arrange: create one request through the API. New requests start as "pending", so it is outstanding.
-    created = client.post("/api/requests/", json={"description": "Fictional request", "category": "cooling_space"})
+    created = client.post("/api/requests/", json={
+        "reference": "REQ-100",
+        "description": "Fictional request", 
+        "category": "cooling_space",
+        "resident_id": resident_id
+    })
     request_id = created.get_json()["id"]
     assert client.get(COUNTS_URL).get_json()["outstanding"] == 1
 

@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Support Requests | HeatShield
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid px-3 px-md-5 py-4">
+    <!-- Page heading -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+      <div>
+        <h1 class="h3 mb-1">Support Requests</h1>
+        <p class="text-muted mb-0">Search and manage heatwave support requests.</p>
+      </div>
+
+      <a href="{% url 'request_create' %}" class="btn btn-primary">+ Create Support Request</a>
+    </div>
+
+    <!-- Search and filters -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <form method="get">
+          <div class="row g-3">
+            <!-- Search -->
+            <div class="col-12 col-md-6">
+              <label for="search" class="form-label">Search requests</label>
+              <input type="text" name="search" id="search" class="form-control" placeholder="Search by ID, resident or description..." value="{{ request.GET.search|default:'' }}" />
+            </div>
+
+            <!-- Category -->
+            <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+              <label for="category" class="form-label">Category</label>
+              <select name="category" id="category" class="form-select">
+                <option value="">All categories</option>
+                {% for value, label in category_choices %}
+                  <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Status -->
+            <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+              <label for="status" class="form-label">Status</label>
+              <select name="status" id="status" class="form-select">
+                <option value="">All statuses</option>
+                {% for value, label in status_choices %}
+                  <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Priority -->
+            <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+              <label for="priority" class="form-label">Priority</label>
+              <select name="priority" id="priority" class="form-select">
+                <option value="">All priorities</option>
+                {% for value, label in priority_choices %}
+                  <option value="{{ value }}" {% if request.GET.priority == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Area -->
+            <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+              <label for="area_id" class="form-label">Area</label>
+              <select name="area_id" id="area_id" class="form-select">
+                <option value="">All areas</option>
+                {% for area in areas %}
+                  <option value="{{ area.id }}" {% if request.GET.area_id == area.id|stringformat:'s' %}selected{% endif %}>{{ area.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="col-12 d-flex gap-2">
+              <button type="submit" class="btn btn-primary">Search and Filter</button>
+              <a href="{% url 'request_dashboard' %}" class="btn btn-outline-secondary">Clear filters</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Results heading -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h5 mb-0">Request List</h2>
+      <span class="text-muted small">{{ support_requests|length }} requests shown</span>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DESKTOP VIEW: Table (Hidden on mobile)     -->
+    <!-- ========================================== -->
+    <div class="card shadow-sm d-none d-md-block">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">Request ID</th>
+              <th scope="col">Resident</th>
+              <th scope="col">Category</th>
+              <th scope="col">Area</th>
+              <th scope="col">Priority</th>
+              <th scope="col">Status</th>
+              <th scope="col">Date Created</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for item in support_requests %}
+              <tr>
+                <td class="fw-semibold">{{ item.id }}</td>
+                <td>{{ item.resident_name }}</td>
+                <td>
+                  {% if item.category == 'cooling_space' %}Cooling space
+                  {% elif item.category == 'welfare_visit' %}Welfare visit
+                  {% elif item.category == 'practical_assistance' %}Practical assistance
+                  {% else %}{{ item.category }}{% endif %}
+                </td>
+                <td>{{ item.area_name|default:'Not assigned' }}</td>
+                <td>
+                  {% if item.operational_priority == 'urgent' %}<span class="badge bg-danger">Urgent</span>
+                  {% elif item.operational_priority == 'high' %}<span class="badge bg-warning text-dark">High</span>
+                  {% elif item.operational_priority == 'normal' %}<span class="badge bg-primary">Normal</span>
+                  {% else %}<span class="badge bg-secondary">Low</span>{% endif %}
+                </td>
+                <td>
+                  {% if item.status == 'pending' %}<span class="badge bg-secondary">Pending</span>
+                  {% elif item.status == 'in_progress' %}<span class="badge bg-warning text-dark">In Progress</span>
+                  {% elif item.status == 'completed' %}<span class="badge bg-success">Completed</span>
+                  {% elif item.status == 'rejected' %}<span class="badge bg-danger">Rejected</span>
+                  {% else %}<span class="badge bg-secondary">{{ item.status }}</span>{% endif %}
+                </td>
+                <td>{{ item.created_at|date:'d M Y' }}</td>
+                <td>
+                  <div class="d-flex gap-2">
+                    <a href="{% url 'request_detail' item.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="{% url 'request_edit' item.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <form method="POST" action="{% url 'request_delete' item.id %}" onsubmit="return confirm('Are you sure you want to delete this support request? This cannot be undone.');" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="8" class="text-center py-5">
+                  <h3 class="h6 text-muted">No support requests found</h3>
+                  <p class="text-muted mb-0">Try changing your search or filters.</p>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MOBILE VIEW: Cards (Hidden on desktop)     -->
+    <!-- ========================================== -->
+    <div class="d-md-none">
+      {% for item in support_requests %}
+        <div class="card shadow-sm mb-3">
+          <div class="card-body">
+            <!-- Header: ID and Status -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fw-bold text-primary">#{{ item.id }}</span>
+              
+              {% if item.status == 'pending' %}<span class="badge bg-secondary">Pending</span>
+              {% elif item.status == 'in_progress' %}<span class="badge bg-warning text-dark">In Progress</span>
+              {% elif item.status == 'completed' %}<span class="badge bg-success">Completed</span>
+              {% elif item.status == 'rejected' %}<span class="badge bg-danger">Rejected</span>
+              {% else %}<span class="badge bg-secondary">{{ item.status }}</span>{% endif %}
+            </div>
+
+            <!-- Core Info -->
+            <h6 class="card-title mb-1">{{ item.resident_name }}</h6>
+            <p class="card-text text-muted small mb-3">
+              {{ item.category }} &middot; {{ item.area_name|default:'No area' }} &middot; {{ item.created_at|date:'d M Y' }}
+            </p>
+
+            <!-- Priority -->
+            <div class="mb-3">
+              <span class="text-muted small me-2">Priority:</span>
+              {% if item.operational_priority == 'urgent' %}<span class="badge bg-danger">Urgent</span>
+              {% elif item.operational_priority == 'high' %}<span class="badge bg-warning text-dark">High</span>
+              {% elif item.operational_priority == 'normal' %}<span class="badge bg-primary">Normal</span>
+              {% else %}<span class="badge bg-secondary">Low</span>{% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 mt-3 pt-3 border-top">
+              <a href="{% url 'request_detail' item.id %}" class="btn btn-sm btn-outline-primary flex-grow-1">View</a>
+              <a href="{% url 'request_edit' item.id %}" class="btn btn-sm btn-outline-secondary flex-grow-1">Edit</a>
+              <form method="POST" action="{% url 'request_delete' item.id %}" onsubmit="return confirm('Are you sure you want to delete this support request?');" class="flex-grow-1">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="card shadow-sm text-center py-5">
+          <h3 class="h6 text-muted">No support requests found</h3>
+          <p class="text-muted mb-0">Try changing your search or filters.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+{% endblock %}
