@@ -20,7 +20,7 @@ def register_error_handlers(app):
 
     @app.errorhandler(HTTPException)
     def handle_http_error(error):
-
+        
         return jsonify({
             "status": error.name,
             "code": error.code,
