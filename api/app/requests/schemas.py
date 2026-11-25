@@ -22,8 +22,8 @@ class RequestCreateSchema(Schema):
         validate=validate.Length(min=1, max=2000),
         metadata={
             "description": "Detailed description of the support request. Must contain between 1 and 2000 characters.",
-            "example": "The cooling system in the main welfare area is not functioning."
-        }
+            "example": "The cooling system in the main welfare area is not functioning.",
+        },
     )
 
     category = fields.String(
@@ -32,8 +32,8 @@ class RequestCreateSchema(Schema):
         metadata={
             "description": "Category of support required. Must be one of the predefined support request categories.",
             "enum": CATEGORIES,
-            "example": "cooling_space"
-        }
+            "example": "cooling_space",
+        },
     )
 
     resident_id = fields.Integer(
@@ -59,8 +59,8 @@ class RequestCreateSchema(Schema):
         metadata={
             "description": "Current status of the support request. Defaults to pending when not provided.",
             "enum": STATUSES,
-            "example": "pending"
-        }
+            "example": "pending",
+        },
     )
 
     operational_priority = fields.String(
@@ -69,8 +69,21 @@ class RequestCreateSchema(Schema):
         metadata={
             "description": "Urgency level assigned to the support request. Defaults to normal when not provided.",
             "enum": PRIORITIES,
-            "example": "normal"
+            "example": "normal",
+        },
+    )
+
+    created_at = fields.DateTime(
+        metadata={
+            "description": "Date and time when the support request was created.",
+            "example": "2026-11-23T09:30:00",
         }
+    )
+    updated_at = fields.DateTime(
+        metadata={
+                    "description": "Date and time when the support request was last.",
+                    "example": "2026-11-23T09:30:00"
+                }
     )
 
 
@@ -81,8 +94,8 @@ class RequestUpdateSchema(Schema):
         validate=validate.Length(min=1, max=2000),
         metadata={
             "description": "Updated description of the support request. Must contain between 1 and 2000 characters.",
-            "example": "The cooling system has stopped working completely."
-        }
+            "example": "The cooling system has stopped working completely.",
+        },
     )
 
     area_id = fields.Integer(
@@ -98,8 +111,8 @@ class RequestUpdateSchema(Schema):
         metadata={
             "description": "Updated status of the support request.",
             "enum": STATUSES,
-            "example": "in_progress"
-        }
+            "example": "in_progress",
+        },
     )
 
     operational_priority = fields.String(
@@ -107,8 +120,8 @@ class RequestUpdateSchema(Schema):
         metadata={
             "description": "Updated urgency level of the support request.",
             "enum": PRIORITIES,
-            "example": "high"
-        }
+            "example": "high",
+        },
     )
 
 
@@ -119,8 +132,8 @@ class RequestResponseSchema(Schema):
         dump_only=True,
         metadata={
             "description": "Unique identifier of the support request.",
-            "example": 101
-        }
+            "example": 101,
+        },
     )
 
     reference = fields.String(
@@ -133,7 +146,7 @@ class RequestResponseSchema(Schema):
     description = fields.String(
         metadata={
             "description": "Detailed description of the support request.",
-            "example": "The cooling system in the main welfare area is not functioning."
+            "example": "The cooling system in the main welfare area is not functioning.",
         }
     )
 
@@ -141,24 +154,24 @@ class RequestResponseSchema(Schema):
         metadata={
             "description": "Category of support required.",
             "enum": CATEGORIES,
-            "example": "cooling_space"
-        }
+            "example": "cooling_space",
+        },
     )
 
     operational_priority = fields.String(
         metadata={
             "description": "Urgency level assigned to the support request.",
             "enum": PRIORITIES,
-            "example": "high"
-        }
+            "example": "high",
+        },
     )
 
     status = fields.String(
         metadata={
             "description": "Current status of the support request.",
             "enum": STATUSES,
-            "example": "in_progress"
-        }
+            "example": "in_progress",
+        },
     )
 
     # Flattened relationship fields for easier consumption by the Django frontend
@@ -192,14 +205,14 @@ class RequestResponseSchema(Schema):
     created_at = fields.DateTime(
         metadata={
             "description": "Date and time when the support request was created.",
-            "example": "2026-11-23T09:30:00"
+            "example": "2026-11-23T09:30:00",
         }
     )
 
     updated_at = fields.DateTime(
         metadata={
             "description": "Date and time when the support request was last updated.",
-            "example": "2026-11-23T10:15:00"
+            "example": "2026-11-23T10:15:00",
         }
     )
 
@@ -218,8 +231,8 @@ class RequestFilterSchema(Schema):
         metadata={
             "description": "Filter support requests by category.",
             "enum": CATEGORIES,
-            "example": "cooling_space"
-        }
+            "example": "cooling_space",
+        },
     )
 
     status = fields.String(
@@ -227,8 +240,8 @@ class RequestFilterSchema(Schema):
         metadata={
             "description": "Filter support requests by their current status.",
             "enum": STATUSES,
-            "example": "pending"
-        }
+            "example": "pending",
+        },
     )
 
     operational_priority = fields.String(
@@ -236,8 +249,8 @@ class RequestFilterSchema(Schema):
         metadata={
             "description": "Filter support requests by urgency level.",
             "enum": PRIORITIES,
-            "example": "urgent"
-        }
+            "example": "urgent",
+        },
     )
 
     area_id = fields.Integer(

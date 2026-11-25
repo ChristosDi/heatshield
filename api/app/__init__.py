@@ -1,6 +1,5 @@
 """HeatShield Flask API: the application factory."""
 from flask import Flask
-from flask_smorest import Api
 
 from .bookings.routes import blp as bookings_blp
 from .common.errors import register_error_handlers
