@@ -2,12 +2,12 @@
 from flask import Flask
 from flask_smorest import Api
 
+from .common.errors import register_error_handlers
 from .config import Config
 from .extensions import api, db, migrate
 from .requests.routes import blp as requests_blp
 from .bookings.routes import blp as bookings_blp
 from .reports.routes import blp as reports_blp
-from .common.errors import register_error_handlers
 
 
 def create_app(test_config=None):
@@ -28,16 +28,17 @@ def create_app(test_config=None):
     from .centres import models as _centres  # noqa: F401
     from .escalations import models as _escalations  # noqa: F401
     from .requests import models as _requests  # noqa: F401
+    from .residents import models as _residents  # noqa: F401  <-- ADD THIS
     from .triage import models as _triage  # noqa: F401
     from .bookings import models as _bookings
     
     # Register error handlers
     register_error_handlers(app)
 
+    # Import routes AFTER models are loaded
+    from .requests.routes import blp as requests_blp
 
-    # Register each feature's blueprint here when its first route is added, for example:
-    #     from .requests.routes import blp as requests_blp
-    #     api.register_blueprint(requests_blp)
+    # Register each feature's blueprint here
     api.register_blueprint(requests_blp)
     api.register_blueprint(bookings_blp)
     api.register_blueprint(reports_blp)
