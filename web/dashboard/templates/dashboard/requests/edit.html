@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Edit Support Request | HeatShield
+{% endblock %}
+
+{% block content %}
+  <div class="container mt-4 mb-5">
+    <!-- Page heading -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+      <div>
+        <h1 class="h3 mb-1">Edit Support Request</h1>
+        <p class="text-muted mb-0">Update the details of an existing support request.</p>
+      </div>
+
+      <a href="{% url 'request_detail' support_request.id %}" class="btn btn-outline-secondary">Back to Request</a>
+    </div>
+
+    <!-- Error messages -->
+    {% for error in errors %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endfor %}
+
+    {% if support_request %}
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <form method="POST">
+            {% csrf_token %}
+
+            <!-- Request ID -->
+            <div class="mb-3">
+              <label for="id" class="form-label">Request ID</label>
+
+              <input type="text" id="id" class="form-control" value="{{ support_request.id }}" disabled />
+
+              <div class="form-text">The request ID cannot be changed.</div>
+            </div>
+
+            <!-- Resident -->
+            <div class="mb-3">
+              <label class="form-label">Resident</label>
+
+              <input type="text" class="form-control" value="{{ support_request.resident_name }}" disabled />
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+
+              <textarea name="description" id="description" class="form-control" rows="4" maxlength="2000" required>{{ support_request.description }}</textarea>
+            </div>
+
+            <!-- Category -->
+            <div class="mb-3">
+              <label for="category" class="form-label">Category</label>
+
+              <select name="category" id="category" class="form-select" required>
+                {% for value, label in categories %}
+                  {% if support_request.category == value %}
+                    <option value="{{ value }}" selected>{{ label }}</option>
+                  {% else %}
+                    <option value="{{ value }}">{{ label }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Area -->
+            <div class="mb-3">
+              <label for="area_id" class="form-label">Area</label>
+
+              <select name="area_id" id="area_id" class="form-select">
+                <option value="">No area selected</option>
+
+                {% for area in areas %}
+                  {% if support_request.area_id == area.id %}
+                    <option value="{{ area.id }}" selected>{{ area.name }}</option>
+                  {% else %}
+                    <option value="{{ area.id }}">{{ area.name }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Priority -->
+            <div class="mb-3">
+              <label for="operational_priority" class="form-label">Priority</label>
+
+              <select name="operational_priority" id="operational_priority" class="form-select" required>
+                {% for value, label in priorities %}
+                  {% if support_request.operational_priority == value %}
+                    <option value="{{ value }}" selected>{{ label }}</option>
+                  {% else %}
+                    <option value="{{ value }}">{{ label }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Status -->
+            <div class="mb-4">
+              <label for="status" class="form-label">Status</label>
+
+              <select name="status" id="status" class="form-select" required>
+                {% for value, label in statuses %}
+                  {% if support_request.status == value %}
+                    <option value="{{ value }}" selected>{{ label }}</option>
+                  {% else %}
+                    <option value="{{ value }}">{{ label }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex flex-wrap gap-2">
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+
+              <a href="{% url 'request_detail' support_request.id %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

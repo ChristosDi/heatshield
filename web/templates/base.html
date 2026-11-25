@@ -20,7 +20,7 @@
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
 			<div class="container-fluid px-3 px-md-5">
 				<!-- Brand -->
-				<a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
+				<a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="{% url 'home' %}">
 					<span class="bg-danger rounded-2 px-2 py-1 text-white"> HS </span>
 					<span>HeatShield</span>
 				</a>
@@ -43,11 +43,17 @@
 					<ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
 						{% if user.is_authenticated %}
 						<li class="nav-item">
-							<a class="nav-link" href="{% url 'home' %}"> Home </a>
+							<a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
+							   href="{% url 'home' %}"> 
+								Home 
+							</a>
 						</li>
 
 						<li class="nav-item">
-							<a class="nav-link" href=""> Support Requests </a>
+							<a class="nav-link {% if request.resolver_match.url_name == 'request_dashboard' or request.resolver_match.url_name == 'request_detail' %}active{% endif %}" 
+							   href="{% url 'request_dashboard' %}"> 
+								Support Requests 
+							</a>
 						</li>
 						{% endif %}
 					</ul>

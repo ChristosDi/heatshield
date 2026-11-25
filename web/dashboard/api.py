@@ -1,5 +1,5 @@
-from django.conf import settings
 import requests
+from django.conf import settings
 
 BASE = settings.FLASK_API_URL.rstrip("/")
 
@@ -10,3 +10,9 @@ def get(path: str, **kwargs):
 
 def post(path: str, **kwargs):
     return requests.post(f"{BASE}{path}", timeout=5, **kwargs)
+
+def patch(path: str, **kwargs):
+    return requests.patch(f"{BASE}{path}", timeout=5, **kwargs)
+
+def delete(path: str, **kwargs):
+    return requests.delete(f"{BASE}{path}", timeout=5, **kwargs)

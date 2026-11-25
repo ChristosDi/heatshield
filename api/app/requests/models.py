@@ -12,7 +12,7 @@ class SupportRequest(db.Model):
     __tablename__ = "support_requests"
 
     id = db.Column(db.Integer, primary_key=True)
-    reference = db.Column(db.String(50), nullable=False, unique=True) # From ERD
+    # reference = db.Column(db.String(50), nullable=False, unique=True) # From ERD
     description = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(20), nullable=False, default="pending")
     category = db.Column(db.String(50), nullable=False)

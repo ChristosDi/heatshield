@@ -8,14 +8,14 @@ from .constants import CATEGORIES, PRIORITIES, STATUSES
 class RequestCreateSchema(Schema):
     """Schema for creating a new support request."""
 
-    reference = fields.String(
-        required=True,
-        validate=validate.Length(min=1, max=50),
-        metadata={
-            "description": "Unique human-readable reference code for the request.",
-            "example": "REQ-2026-001"
-        }
-    )
+    # reference = fields.String(
+    #     required=True,
+    #     validate=validate.Length(min=1, max=50),
+    #     metadata={
+    #         "description": "Unique human-readable reference code for the request.",
+    #         "example": "REQ-2026-001"
+    #     }
+    # )
 
     description = fields.String(
         required=True,
@@ -40,8 +40,8 @@ class RequestCreateSchema(Schema):
         required=True,
         metadata={
             "description": "The ID of the resident raising the support request.",
-            "example": 42
-        }
+            "example": 42,
+        },
     )
 
     area_id = fields.Integer(
@@ -49,8 +49,8 @@ class RequestCreateSchema(Schema):
         load_default=None,
         metadata={
             "description": "The ID of the area associated with the support request. Optional.",
-            "example": 3
-        }
+            "example": 3,
+        },
     )
 
     status = fields.String(
@@ -81,14 +81,23 @@ class RequestCreateSchema(Schema):
     )
     updated_at = fields.DateTime(
         metadata={
-                    "description": "Date and time when the support request was last.",
-                    "example": "2026-11-23T09:30:00"
-                }
+            "description": "Date and time when the support request was last.",
+            "example": "2026-11-23T09:30:00",
+        }
     )
 
 
 class RequestUpdateSchema(Schema):
     """Schema for updating an existing support request."""
+
+    category = fields.String(
+        validate=validate.OneOf(CATEGORIES),
+        metadata={
+            "description": "Updated category of the support request.",
+            "enum": CATEGORIES,
+            "example": "cooling_space",
+        },
+    )
 
     description = fields.String(
         validate=validate.Length(min=1, max=2000),
@@ -102,8 +111,8 @@ class RequestUpdateSchema(Schema):
         allow_none=True,
         metadata={
             "description": "Updated ID of the area associated with the request. Set to null to remove the area.",
-            "example": 4
-        }
+            "example": 4,
+        },
     )
 
     status = fields.String(
@@ -136,12 +145,12 @@ class RequestResponseSchema(Schema):
         },
     )
 
-    reference = fields.String(
-        metadata={
-            "description": "Unique human-readable reference code.",
-            "example": "REQ-2026-001"
-        }
-    )
+    # reference = fields.String(
+    #     metadata={
+    #         "description": "Unique human-readable reference code.",
+    #         "example": "REQ-2026-001"
+    #     }
+    # )
 
     description = fields.String(
         metadata={
@@ -178,18 +187,15 @@ class RequestResponseSchema(Schema):
     resident_id = fields.Integer(
         metadata={
             "description": "ID of the resident who raised the request.",
-            "example": 42
+            "example": 42,
         }
     )
-    
+
     resident_name = fields.Method("get_resident_name")
 
     area_id = fields.Integer(
         allow_none=True,
-        metadata={
-            "description": "ID of the associated area.",
-            "example": 3
-        }
+        metadata={"description": "ID of the associated area.", "example": 3},
     )
 
     area_name = fields.Method("get_area_name")
@@ -198,8 +204,8 @@ class RequestResponseSchema(Schema):
         dump_only=True,
         metadata={
             "description": "Calculated time elapsed since creation (if not resolved).",
-            "example": "2 days, 4 hours"
-        }
+            "example": "2 days, 4 hours",
+        },
     )
 
     created_at = fields.DateTime(
@@ -254,15 +260,12 @@ class RequestFilterSchema(Schema):
     )
 
     area_id = fields.Integer(
-        metadata={
-            "description": "Filter support requests by area ID.",
-            "example": 3
-        }
+        metadata={"description": "Filter support requests by area ID.", "example": 3}
     )
 
     search = fields.String(
         metadata={
-            "description": "Search term to match against reference, description, or resident name.",
-            "example": "REQ-2026"
+            "description": "Search term to match against description, or resident name.",
+            "example": "REQ-2026",
         }
     )

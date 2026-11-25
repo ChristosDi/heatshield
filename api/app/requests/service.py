@@ -31,7 +31,7 @@ def create_request(data):
 
     # 3. Safe to create
     support_request = SupportRequest(
-        reference=data["reference"].strip(),
+        # reference=data["reference"].strip(),
         description=data["description"].strip(),
         category=data["category"],
         resident_id=data["resident_id"],
@@ -69,7 +69,7 @@ def get_all_requests(filters=None):
             # Join Resident to search by their name, and use 'or_' for multiple columns
             query = query.outerjoin(Resident).filter(
                 or_(
-                    SupportRequest.reference.ilike(search_term),
+                    # SupportRequest.reference.ilike(search_term),
                     SupportRequest.description.ilike(search_term),
                     Resident.display_name.ilike(search_term),
                 )

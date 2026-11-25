@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Create Support Request | HeatShield
+{% endblock %}
+
+{% block content %}
+  <div class="container mt-4 mb-5">
+    <!-- Page heading -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 mb-1">Create Support Request</h1>
+        <p class="text-muted mb-0">Record a new resident support request.</p>
+      </div>
+
+      <a href="{% url 'request_dashboard' %}" class="btn btn-outline-secondary">Back to Requests</a>
+    </div>
+
+    <!-- Error messages -->
+    {% for error in errors %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endfor %}
+
+    <!-- Create form -->
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST">
+          {% csrf_token %}
+
+          {% comment %} <!-- Reference -->
+          <div class="mb-3">
+            <label for="reference" class="form-label">Request Reference</label>
+
+            <input type="text" class="form-control" id="reference" name="reference" maxlength="50" value="{{ request.POST.reference|default:'' }}" placeholder="Example: HS-001" required />
+          </div> {% endcomment %}
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+
+            <textarea class="form-control" id="description" name="description" rows="4" maxlength="2000" placeholder="Describe the resident's support needs..." required>{{ request.POST.description|default:'' }}</textarea>
+          </div>
+
+          <!-- Category -->
+          <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+
+            <select class="form-select" id="category" name="category" required>
+              <option value="">Select a category</option>
+
+              {% for value, label in categories %}
+                {% if request.POST.category == value %}
+                  <option value="{{ value }}" selected>{{ label }}</option>
+                {% else %}
+                  <option value="{{ value }}">{{ label }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Resident -->
+          <div class="mb-3">
+            <label class="form-label">Resident</label>
+
+            <div id="existing-resident-fields">
+              <select class="form-select" id="resident_id" name="resident_id">
+                <option value="">Select an existing resident</option>
+
+                {% for resident in residents %}
+                  {% if request.POST.resident_id == resident.id|stringformat:'s' %}
+                    <option value="{{ resident.id }}" selected>{{ resident.display_name }}</option>
+                  {% else %}
+                    <option value="{{ resident.id }}">{{ resident.display_name }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+
+            <input type="hidden" name="add_new_resident" id="add_new_resident" value="no" />
+
+            <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="toggle-resident">+ Add new resident</button>
+
+            <!-- New resident fields -->
+            <div id="new-resident-fields" class="border rounded p-3 mt-3" hidden>
+              <h6 class="mb-3">New Resident Details</h6>
+
+              <div class="mb-3">
+                <label for="new_resident_name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="new_resident_name" name="new_resident_name" maxlength="100" value="{{ request.POST.new_resident_name|default:'' }}" />
+              </div>
+
+              <div class="mb-3">
+                <label for="new_resident_phone" class="form-label">Contact Phone (optional)</label>
+                <input type="text" class="form-control" id="new_resident_phone" name="new_resident_phone" maxlength="20" value="{{ request.POST.new_resident_phone|default:'' }}" />
+              </div>
+
+              <div class="mb-3">
+                <label for="new_resident_postcode" class="form-label">Postcode (optional)</label>
+                <input type="text" class="form-control" id="new_resident_postcode" name="new_resident_postcode" maxlength="10" value="{{ request.POST.new_resident_postcode|default:'' }}" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Area -->
+          <div class="mb-3">
+            <label for="area_id" class="form-label">Area</label>
+
+            <select class="form-select" id="area_id" name="area_id">
+              <option value="">No area selected</option>
+
+              {% for area in areas %}
+                {% if request.POST.area_id == area.id|stringformat:'s' %}
+                  <option value="{{ area.id }}" selected>{{ area.name }}</option>
+                {% else %}
+                  <option value="{{ area.id }}">{{ area.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Priority -->
+          <div class="mb-3">
+            <label for="operational_priority" class="form-label">Priority</label>
+
+            <select class="form-select" id="operational_priority" name="operational_priority" required>
+              {% for value, label in priorities %}
+                {% if request.POST.operational_priority == value %}
+                  <option value="{{ value }}" selected>{{ label }}</option>
+                {% elif not request.POST.operational_priority and value == 'normal' %}
+                  <option value="{{ value }}" selected>{{ label }}</option>
+                {% else %}
+                  <option value="{{ value }}">{{ label }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div class="mb-4">
+            <label for="status" class="form-label">Status</label>
+
+            <select class="form-select" id="status" name="status" required>
+              {% for value, label in statuses %}
+                {% if request.POST.status == value %}
+                  <option value="{{ value }}" selected>{{ label }}</option>
+                {% elif not request.POST.status and value == 'pending' %}
+                  <option value="{{ value }}" selected>{{ label }}</option>
+                {% else %}
+                  <option value="{{ value }}">{{ label }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Buttons -->
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Create Support Request</button>
+
+            <a href="{% url 'request_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const toggleButton = document.getElementById('toggle-resident')
+      const existingFields = document.getElementById('existing-resident-fields')
+      const newFields = document.getElementById('new-resident-fields')
+      const addNewResident = document.getElementById('add_new_resident')
+      const residentSelect = document.getElementById('resident_id')
+      const residentName = document.getElementById('new_resident_name')
+    
+      toggleButton.addEventListener('click', function () {
+        const addingNew = addNewResident.value !== 'yes'
+    
+        if (addingNew) {
+          existingFields.hidden = true
+          newFields.hidden = false
+          residentSelect.required = false
+          residentName.required = true
+          addNewResident.value = 'yes'
+          toggleButton.textContent = 'Choose existing resident instead'
+        } else {
+          existingFields.hidden = false
+          newFields.hidden = true
+          residentSelect.required = true
+          residentName.required = false
+          addNewResident.value = 'no'
+          toggleButton.textContent = '+ Add new resident'
+        }
+      })
+    })
+  </script>
+{% endblock %}
