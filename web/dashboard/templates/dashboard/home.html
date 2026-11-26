@@ -17,8 +17,13 @@
           <p class="text-white-50 mb-3">Coordinate heatwave support requests, monitor progress and help protect vulnerable residents.</p>
 
           <p class="mb-0">
-            <span class="text-white-50">Your role:</span>
-            <span class="badge bg-secondary ms-1">{{ role|default:'No role assigned' }}</span>
+              Role: {% if role %}
+                  <span class="badge bg-secondary ms-1">{{ role }}</span>
+              {% else %}
+                  <span class="text-white-50 ms-1">
+                      You have no role yet. Please ask an administrator to assign one.
+                  </span>
+              {% endif %}
           </p>
         </div>
 
@@ -42,74 +47,67 @@
     </div>
 
     <!-- Statistics cards -->
-    {% if counts %}
-      <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <p class="text-muted small fw-semibold mb-2">OUTSTANDING</p>
-                  <h2 class="display-5 fw-bold mb-0">{{ counts.outstanding }}</h2>
-                </div>
-                <span class="badge bg-warning-subtle text-warning-emphasis p-2">Active</span>
-              </div>
-              <p class="text-muted small mt-3 mb-0">Requests requiring attention</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <p class="text-muted small fw-semibold mb-2">COMPLETED</p>
-                  <h2 class="display-5 fw-bold text-success mb-0">{{ counts.completed }}</h2>
-                </div>
-                <span class="badge bg-success-subtle text-success p-2">Done</span>
-              </div>
-              <p class="text-muted small mt-3 mb-0">Successfully completed requests</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <p class="text-muted small fw-semibold mb-2">REJECTED</p>
-                  <h2 class="display-5 fw-bold text-danger mb-0">{{ counts.rejected }}</h2>
-                </div>
-                <span class="badge bg-danger-subtle text-danger p-2">Rejected</span>
-              </div>
-              <p class="text-muted small mt-3 mb-0">Requests that were rejected</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <p class="text-muted small fw-semibold mb-2">TOTAL REQUESTS</p>
-                  <h2 class="display-5 fw-bold mb-0">{{ counts.total }}</h2>
-                </div>
-                <span class="badge bg-primary-subtle text-primary p-2">All</span>
-              </div>
-              <p class="text-muted small mt-3 mb-0">All recorded support requests</p>
-            </div>
-          </div>
+{% if counts %}
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <p class="text-muted small fw-semibold mb-2">OUTSTANDING</p>
+          <dl class="mb-0">
+            <dt>Outstanding</dt><dd>{{ counts.outstanding }}</dd>
+          </dl>
+          <span class="badge bg-warning-subtle text-warning-emphasis p-2">Active</span>
+          <p class="text-muted small mt-3 mb-0">Requests requiring attention</p>
         </div>
       </div>
-    {% else %}
-      <div class="alert alert-warning border-0 shadow-sm" role="alert">
-        <h3 class="h6 fw-bold">Statistics unavailable</h3>
-        <p class="mb-0">The request counts can't be loaded right now. Check that the Flask API is running, then refresh the page.</p>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <p class="text-muted small fw-semibold mb-2">COMPLETED</p>
+          <dl class="mb-0">
+            <dt>Completed</dt><dd>{{ counts.completed }}</dd>
+          </dl>
+          <span class="badge bg-success-subtle text-success p-2">Done</span>
+          <p class="text-muted small mt-3 mb-0">Successfully completed requests</p>
+        </div>
       </div>
-    {% endif %}
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <p class="text-muted small fw-semibold mb-2">REJECTED</p>
+          <dl class="mb-0">
+            <dt>Rejected</dt><dd>{{ counts.rejected }}</dd>
+          </dl>
+          <span class="badge bg-danger-subtle text-danger p-2">Rejected</span>
+          <p class="text-muted small mt-3 mb-0">Requests that were rejected</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <p class="text-muted small fw-semibold mb-2">TOTAL REQUESTS</p>
+          <dl class="mb-0">
+            <dt>Total</dt><dd>{{ counts.total }}</dd>
+          </dl>
+          <span class="badge bg-primary-subtle text-primary p-2">All</span>
+          <p class="text-muted small mt-3 mb-0">All recorded support requests</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-warning border-0 shadow-sm" role="alert">
+    <h3 class="h6 fw-bold">Statistics unavailable</h3>
+    <p class="mb-0">The request counts can't be loaded right now. Check that the Flask API is running, then refresh the page.</p>
+  </div>
+{% endif %}
+
 
     <!-- Quick actions -->
     <h2 class="h4 fw-bold mb-3">Quick actions</h2>

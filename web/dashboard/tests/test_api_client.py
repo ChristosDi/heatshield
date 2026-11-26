@@ -23,16 +23,29 @@ def test_request_counts_returns_the_four_numbers(fake_flask):
     assert api_client.request_counts() == COUNTS
 
 
-def test_calls_the_counts_route_on_the_configured_api_with_a_time_limit(fake_flask, settings):
-    """Django calls the counts route at the address in FLASK_API_URL, and never waits forever."""
-    settings.FLASK_API_URL = "http://127.0.0.1:5001"
+
+def test_calls_the_counts_route_on_the_configured_api_with_a_time_limit(
+    fake_flask, settings
+):
+    """Django calls the counts route at the configured API address with a time limit."""
+    settings.FLASK_API_URL = os.environ.get(
+        "FLASK_API_URL", "http://127.0.0.1:5000"
+    ).rstrip("/")
+
     fake_flask.answer(COUNTS)
 
     api_client.request_counts()
 
     assert fake_flask.calls == [
-        {"url": "http://127.0.0.1:5001/api/reports/request-counts", "timeout": api_client.TIMEOUT_SECONDS}
+        {
+            "url": (
+                settings.FLASK_API_URL
+                + "/api/reports/request-counts"
+            ),
+            "timeout": api_client.TIMEOUT_SECONDS,
+        }
     ]
+
 
 
 def test_api_down_raises_api_unavailable():

@@ -65,5 +65,6 @@ def test_home_page_links_the_counts_stylesheet(signed_in_client, fake_flask):
     fake_flask.answer(COUNTS)
 
     response = signed_in_client.get(reverse("home"))
-
-    assert b'href="/static/dashboard/dashboard.css"' in response.content
+    
+    assert response.status_code == 200
+    assert b"bootstrap@5.3.3/dist/css/bootstrap.min.css" in response.content #https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css

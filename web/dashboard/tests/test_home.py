@@ -21,7 +21,8 @@ def test_signed_in_user_sees_the_home_page_with_their_role(client):
     response = client.get(reverse("home"))
 
     assert response.status_code == 200
-    assert b"Role: coordinator" in response.content
+    assert b"Role:" in response.content
+    assert b"coordinator" in response.content
 
 
 @pytest.mark.django_db

@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from staff.roles import role_of
 
 from . import api_client
-from .api import delete, get, patch, post
+from .api_client import delete, get, patch, post
 from .constants import CATEGORIES, PRIORITIES, STATUSES
 
 logger = logging.getLogger(__name__)
