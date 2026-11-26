@@ -69,7 +69,7 @@ def get_all_requests(filters=None):
             # Join Resident to search by their name, and use 'or_' for multiple columns
             query = query.outerjoin(Resident).filter(
                 or_(
-                    # SupportRequest.reference.ilike(search_term),
+                    SupportRequest.reference.ilike(search_term),
                     SupportRequest.description.ilike(search_term),
                     Resident.display_name.ilike(search_term),
                 )
@@ -78,9 +78,13 @@ def get_all_requests(filters=None):
     return query.order_by(SupportRequest.created_at.desc()).all()
 
 
-def get_request(request_id):
+def get_request_by_id(request_id):
     """Fetch a single support request by its primary key."""
     return db.session.get(SupportRequest, request_id)
+
+def get_request_by_reference(reference):
+    """Fetch a single support request by its reference value."""
+    return SupportRequest.query.filter_by(reference=reference).first()
 
 
 def update_request(support_request, data):

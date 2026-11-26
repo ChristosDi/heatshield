@@ -1,11 +1,11 @@
 
 """Services: booking management and capacity validation."""
 
-from ..extensions import db
-from .models import Booking
-from ..requests.models import SupportRequest
 from ..centres.models import CoolingCentre
+from ..extensions import db
+from ..requests.models import SupportRequest
 from .constants import ACTIVE_BOOKING_STATUSES
+from .models import Booking
 
 
 def get_all_bookings(filters=None):
@@ -41,7 +41,7 @@ def get_booking(booking_id):
 def check_centre_availability(centre, exclude_booking_id=None):
     """Check whether a cooling centre is open and has capacity."""
 
-    if not centre.is_open:
+    if centre.status != "open":
         raise ValueError("Cooling centre is closed")
 
     query = Booking.query.filter(
