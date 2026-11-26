@@ -42,6 +42,9 @@ class BookingList(MethodView):
         except LookupError as error:
             abort(404, message=str(error))
 
+        except service.CentreAvailabilityError as error:
+            abort(409, message=str(error))
+
         except ValueError as error:
             abort(400, message=str(error))
 
@@ -66,16 +69,14 @@ class BookingDetail(MethodView):
     def patch(self, data, booking_id):
         """Update a booking's status or cooling centre."""
 
-        booking = service.get_booking(booking_id)
-
-        if booking is None:
-            abort(404, message="Booking not found")
-
         try:
-            return service.update_booking(booking, data)
+            return service.update_booking(booking_id, data)
 
         except LookupError as error:
             abort(404, message=str(error))
+
+        except service.CentreAvailabilityError as error:
+            abort(409, message=str(error))
 
         except ValueError as error:
             abort(400, message=str(error))

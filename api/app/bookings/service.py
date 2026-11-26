@@ -1,11 +1,21 @@
-
 """Services: booking management and capacity validation."""
 
+from sqlalchemy import text
 from ..extensions import db
 from .models import Booking
 from ..requests.models import SupportRequest
 from ..centres.models import CoolingCentre
 from .constants import ACTIVE_BOOKING_STATUSES
+
+
+class CentreAvailabilityError(Exception):
+    """Raised when a cooling centre is closed or has no available spaces."""
+
+def begin_booking_transaction():
+    """Get an SQLite write lock before validating booking capacity -
+    other transactions must wait for this one to finish"""
+
+    db.session.execute(text("BEGIN IMMEDIATE"))
 
 
 def get_all_bookings(filters=None):
@@ -41,8 +51,8 @@ def get_booking(booking_id):
 def check_centre_availability(centre, exclude_booking_id=None):
     """Check whether a cooling centre is open and has capacity."""
 
-    if not centre.is_open:
-        raise ValueError("Cooling centre is closed")
+    if centre.status != "open":
+        raise CentreAvailabilityError("Cooling centre is closed")
 
     query = Booking.query.filter(
         Booking.centre_id == centre.id,
@@ -58,13 +68,16 @@ def check_centre_availability(centre, exclude_booking_id=None):
     occupied_places = query.count()
 
     if occupied_places >= centre.capacity:
-        raise ValueError("Cooling centre is at full capacity")
+        raise CentreAvailabilityError("Cooling centre is at full capacity")
 
     return True
 
 
 def create_booking(data):
     """Create a pending booking after validating the request and centre."""
+
+    #get the write lock before checking centre availability
+    begin_booking_transaction()
 
     support_request = db.session.get(
         SupportRequest,
@@ -101,44 +114,35 @@ def create_booking(data):
     return booking
 
 
-def update_booking(booking, data):
-    """Update a booking and validate any centre reassignment."""
+def update_booking(booking_id, data):
+    """Update a booking after validating centre availability."""
 
-    new_centre_id = data.get("centre_id")
-    new_status = data.get("status")
+    begin_booking_transaction()
 
-    if new_centre_id is not None:
-        centre = db.session.get(
-            CoolingCentre,
-            new_centre_id
+    booking = get_booking(booking_id)
+
+    if booking is None:
+        raise LookupError("Booking not found")
+
+    new_centre_id = data.get("centre_id", booking.centre_id)
+    new_status = data.get("status", booking.status)
+
+    centre = db.session.get(CoolingCentre, new_centre_id)
+
+    if centre is None:
+        raise LookupError("Cooling centre not found")
+
+    # Validate availability before saving an active booking.
+    if new_status in ACTIVE_BOOKING_STATUSES:
+        check_centre_availability(
+            centre,
+            exclude_booking_id=booking.id
         )
 
-        if centre is None:
-            raise LookupError("Cooling centre not found")
 
-        # Check availability when changing centres.
-        if centre.id != booking.centre_id:
-            check_centre_availability(
-                centre,
-                exclude_booking_id=booking.id
-            )
-
-            booking.centre_id = centre.id
-
-    if new_status is not None:
-        # Recheck capacity before approving a booking.
-        if new_status == "approved":
-            centre = db.session.get(
-                CoolingCentre,
-                booking.centre_id
-            )
-
-            check_centre_availability(
-                centre,
-                exclude_booking_id=booking.id
-            )
-
-        booking.status = new_status
+    # Apply changes only after validation succeeds.
+    booking.centre_id = new_centre_id
+    booking.status = new_status
 
     db.session.commit()
 
