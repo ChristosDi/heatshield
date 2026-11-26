@@ -92,3 +92,55 @@ class RequestDetail(MethodView):
             abort(404, message="Request not found")
 
         service.delete_request(request)
+
+
+# GET ONE / UPDATE ONE / DELETE ONE BY ID
+@blp.route("/id/<int:request_id>")
+class RequestDetailById(MethodView):
+
+    @blp.doc(
+        summary="Get a support request by ID",
+        description="Retrieve a support request using its database ID.",
+    )
+    @blp.response(200, RequestResponseSchema)
+    @blp.alt_response(404, description="Request not found")
+    def get(self, request_id):
+        """Retrieve a support request by its database ID."""
+        support_request = service.get_request_by_id(request_id)
+
+        if support_request is None:
+            abort(404, message="Request not found")
+
+        return support_request
+
+    @blp.doc(
+        summary="Update a support request by ID",
+        description="Partially update a support request using its database ID.",
+    )
+    @blp.arguments(RequestUpdateSchema(partial=True))
+    @blp.response(200, RequestResponseSchema)
+    @blp.alt_response(404, description="Request not found")
+    def patch(self, data, request_id):
+        """Update a support request using its database ID."""
+        support_request = service.get_request_by_id(request_id)
+
+        if support_request is None:
+            abort(404, message="Request not found")
+
+        return service.update_request(support_request, data)
+
+    @blp.doc(
+        summary="Delete a support request by ID",
+        description="Permanently delete a support request using its database ID.",
+    )
+    @blp.response(204)
+    @blp.alt_response(404, description="Request not found")
+    def delete(self, request_id):
+        """Delete a support request using its database ID."""
+        support_request = service.get_request_by_id(request_id)
+
+        if support_request is None:
+            abort(404, message="Request not found")
+
+        service.delete_request(support_request)
+        return ""
