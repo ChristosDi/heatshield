@@ -3,11 +3,12 @@ from datetime import datetime
 
 import requests
 from django.shortcuts import redirect, render
-from staff.roles import role_of
+from staff.roles import role_of, role_required
 
 from . import api_client
 from .api_client import delete, get, patch, post
 from .constants import CATEGORIES, PRIORITIES, STATUSES
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +85,7 @@ def request_dashboard(request):
         },
     )
 
-
+@login_required
 def request_detail(request, reference):
     """Display details of an individual support request."""
     try:
@@ -132,7 +133,7 @@ def request_detail(request, reference):
         },
     )
 
-
+@login_required
 def request_create(request):
     """Display and process the create support request form."""
 
@@ -272,7 +273,8 @@ def request_create(request):
     )
 
 
-
+@login_required
+@role_required("coordinator", "admin")
 def request_edit(request, reference):
     """Display and process the edit support request form."""
 
@@ -430,7 +432,8 @@ def request_edit(request, reference):
     )
 
 
-
+@login_required
+@role_required("coordinator", "admin")
 def request_delete(request, reference):
     """Delete an existing support request."""
 
@@ -464,7 +467,7 @@ def request_delete(request, reference):
 
     return redirect("request_detail", reference)
 
-
+@login_required
 def cooling_centre_dashboard(request):
     centres_response = get("/api/centres/")
     areas_response = get("/api/areas/")
@@ -491,7 +494,7 @@ def cooling_centre_dashboard(request):
         {"centres": centres},
     )
 
-
+@login_required
 def cooling_centre_create(request):
     areas_response = get("/api/areas/")
     areas = areas_response.json() if areas_response.ok else []
@@ -590,7 +593,7 @@ def cooling_centre_create(request):
         },
     )
 
-
+@login_required
 def cooling_centre_details(request, centre_id):
     """Display details of an individual cooling centre."""
 
@@ -677,7 +680,8 @@ def cooling_centre_details(request, centre_id):
         },
     )
 
-
+@login_required
+@role_required("coordinator", "admin")
 def cooling_centre_edit(request, centre_id):
     """Display and process the edit cooling centre form."""
 
