@@ -32,6 +32,11 @@ class SupportRequest(db.Model):
     # Foreign Keys
     resident_id = db.Column(db.Integer, db.ForeignKey("residents.id"), nullable=False)
     area_id = db.Column(db.Integer, db.ForeignKey("areas.id"), nullable=True)
+    
+    resident = db.relationship(
+        "Resident",
+        back_populates ="requests"
+    )
 
     # Note: 'waiting_time' is a calculated oval in the ERD (indicated by dashed lines),
     # so it should NOT be a database column. It should be a @property instead.

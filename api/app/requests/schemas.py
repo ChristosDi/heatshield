@@ -183,6 +183,8 @@ class RequestResponseSchema(Schema):
     )
 
     resident_name = fields.Method("get_resident_name")
+    resident_phone = fields.Method("get_resident_phone")
+    resident_postcode = fields.Method("get_resident_postcode")
 
     area_id = fields.Integer(
         allow_none=True,
@@ -215,6 +217,12 @@ class RequestResponseSchema(Schema):
 
     def get_resident_name(self, obj):
         return obj.resident.display_name if obj.resident else None
+
+    def get_resident_phone(self, obj):
+        return obj.resident.contact_phone if obj.resident else None
+
+    def get_resident_postcode(self, obj):
+        return obj.resident.postcode if obj.resident else None
 
     def get_area_name(self, obj):
         return obj.area.name if obj.area else None

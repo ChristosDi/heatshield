@@ -45,6 +45,26 @@
                     <dt class="col-sm-3">Request Reference</dt>
                     <dd class="col-sm-9">{{ support_request.reference }}</dd>
 
+                    <dt class="col-sm-3">Resident Name</dt>
+                    <dd class="col-sm-9">
+                        {{ support_request.resident_name|default:"Not provided" }}
+                    </dd>
+
+                    <dt class="col-sm-3">Resident ID</dt>
+                    <dd class="col-sm-9">
+                        {{ support_request.resident_id|default:"Not provided" }}
+                    </dd>
+
+                    <dt class="col-sm-3">Resident Mobile</dt>
+                    <dd class="col-sm-9">
+                        {{ support_request.resident_phone|default:"Not provided" }}
+                    </dd>
+
+                    <dt class="col-sm-3">Resident Postcode</dt>
+                    <dd class="col-sm-9">
+                        {{ support_request.resident_postcode|default:"Not provided" }}
+                    </dd>
+
                     <dt class="col-sm-3">Category</dt>
                     <dd class="col-sm-9">{{ support_request.category }}</dd>
 
