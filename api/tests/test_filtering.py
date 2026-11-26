@@ -12,7 +12,7 @@ from app.areas.models import Area
 # Notice we are using the new DB field names and FK references
 TEST_REQUESTS = [
     {
-        "reference": "REQ-001",
+        # "reference": "REQ-001",
         "description": "Resident needs a cooling space",
         "category": "cooling_space",
         "status": "pending",
@@ -20,7 +20,7 @@ TEST_REQUESTS = [
         "area_name": "Bolton",
     },
     {
-        "reference": "REQ-002",
+        # "reference": "REQ-002",
         "description": "Resident needs a welfare visit",
         "category": "welfare_visit",
         "status": "in_progress",
@@ -28,7 +28,7 @@ TEST_REQUESTS = [
         "area_name": "Farnworth",
     },
     {
-        "reference": "REQ-003",
+        # "reference": "REQ-003",
         "description": "Resident needs practical assistance",
         "category": "practical_assistance",
         "status": "completed",
@@ -60,7 +60,7 @@ def sample_requests(client, app):
     # 3. Create the requests via the API
     for req_data in TEST_REQUESTS:
         payload = {
-            "reference": req_data["reference"],
+            # "reference": req_data["reference"],
             "description": req_data["description"],
             "category": req_data["category"],
             "status": req_data["status"],
