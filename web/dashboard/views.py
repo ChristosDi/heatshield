@@ -85,10 +85,10 @@ def request_dashboard(request):
     )
 
 
-def request_detail(request, request_id):
+def request_detail(request, reference):
     """Display details of an individual support request."""
     try:
-        response = get(f"/api/requests/{request_id}")
+        response = get(f"/api/requests/{reference}")
         response.raise_for_status()
 
         support_request = response.json()
@@ -102,7 +102,7 @@ def request_detail(request, request_id):
     except requests.HTTPError as exc:
         logger.warning(
             "Could not retrieve support request %s: %s",
-            request_id,
+            reference,
             exc,
         )
 
@@ -116,7 +116,7 @@ def request_detail(request, request_id):
     except requests.RequestException:
         logger.warning(
             "Flask API unavailable for support request %s",
-            request_id,
+            reference,
             exc_info=True,
         )
         support_request = None
@@ -126,7 +126,7 @@ def request_detail(request, request_id):
         request,
         "dashboard/requests/detail.html",
         {
-            "request_id": request_id,
+            "request_id": reference,
             "support_request": support_request,
             "error": error,
         },
@@ -195,7 +195,6 @@ def request_create(request):
             errors.append("Please select a resident or add a new one.")
 
         data = {
-            # "reference": request.POST.get("reference", "").strip(),
             "description": request.POST.get("description", "").strip(),
             "category": request.POST.get("category", ""),
             "resident_id": resident_id,
@@ -236,10 +235,10 @@ def request_create(request):
                 response.raise_for_status()
 
                 created_request = response.json()
-
+                print(created_request)
                 return redirect(
                     "request_detail",
-                    request_id=created_request["id"],
+                    reference=created_request["reference"],
                 )
 
             except requests.HTTPError:
@@ -273,7 +272,7 @@ def request_create(request):
     )
 
 
-def request_edit(request, request_id):
+def request_edit(request, reference):
     """Display and process the edit support request form."""
 
     errors = []
@@ -281,7 +280,7 @@ def request_edit(request, request_id):
     areas = []
 
     try:
-        response = get(f"/api/requests/{request_id}")
+        response = get(f"/api/requests/{reference}")
         response.raise_for_status()
         support_request = response.json()
 
@@ -292,7 +291,7 @@ def request_edit(request, request_id):
     except requests.HTTPError as exc:
         logger.warning(
             "Could not retrieve request %s",
-            request_id,
+            reference,
             exc_info=True,
         )
 
@@ -302,7 +301,7 @@ def request_edit(request, request_id):
                 "dashboard/requests/edit.html",
                 {
                     "error": "Support request not found.",
-                    "request_id": request_id,
+                    "request_id": reference,
                 },
                 status=404,
             )
@@ -343,7 +342,7 @@ def request_edit(request, request_id):
         if not errors:
             try:
                 update_response = patch(
-                    f"/api/requests/{request_id}",
+                    f"/api/requests/{reference}",
                     json=data,
                     headers={"X-HTTP-Method-Override": "PATCH"},
                 )
@@ -356,13 +355,13 @@ def request_edit(request, request_id):
 
                 return redirect(
                     "request_detail",
-                    request_id=request_id,
+                    reference,
                 )
 
             except requests.RequestException:
                 logger.warning(
                     "Could not update support request %s",
-                    request_id,
+                    reference,
                     exc_info=True,
                 )
                 errors.append("The support request could not be updated.")
@@ -383,19 +382,20 @@ def request_edit(request, request_id):
         },
     )
 
-def request_delete(request, request_id):
+
+def request_delete(request, reference):
     """Delete an existing support request."""
 
     if request.method == "POST":
         try:
-            response = delete(f"/api/requests/{request_id}")
+            response = delete(f"/api/requests/{reference}")
             response.raise_for_status()
             return redirect("request_dashboard")
 
         except requests.HTTPError as exc:
             logger.warning(
                 "Could not delete support request %s: %s",
-                request_id,
+                reference,
                 exc,
             )
             error = "Could not delete this support request."
@@ -403,7 +403,7 @@ def request_delete(request, request_id):
         except requests.RequestException:
             logger.warning(
                 "Flask API unavailable while deleting request %s",
-                request_id,
+                reference,
                 exc_info=True,
             )
             error = "The support request service is currently unavailable."
@@ -411,7 +411,335 @@ def request_delete(request, request_id):
         return render(
             request,
             "dashboard/requests/delete_error.html",
-            {"request_id": request_id, "error": error},
+            {"reference": reference, "error": error},
         )
 
-    return redirect("request_detail", request_id=request_id)
+    return redirect("request_detail", reference)
+
+
+def cooling_centre_dashboard(request):
+    centres_response = get("/api/centres/")
+    areas_response = get("/api/areas/")
+
+    centres = []
+    areas_by_id = {}
+
+    if centres_response.ok:
+        centres = centres_response.json()
+
+    if areas_response.ok:
+        areas = areas_response.json()
+        areas_by_id = {area["id"]: area.get("name", "Unknown area") for area in areas}
+
+    for centre in centres:
+        centre["area_name"] = areas_by_id.get(
+            centre.get("area_id"),
+            "Unknown area",
+        )
+
+    return render(
+        request,
+        "dashboard/cooling_centres/dashboard.html",
+        {"centres": centres},
+    )
+
+
+def cooling_centre_create(request):
+    areas_response = get("/api/areas/")
+    areas = areas_response.json() if areas_response.ok else []
+    errors = []
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        location = request.POST.get("location", "").strip()
+        status = request.POST.get("status", "open")
+        capacity_value = request.POST.get("capacity", "").strip()
+        add_new_area = request.POST.get("add_new_area") == "yes"
+
+        try:
+            capacity = int(capacity_value)
+            if capacity < 1:
+                raise ValueError
+        except ValueError:
+            errors.append("Enter a capacity of at least 1.")
+            capacity = None
+
+        area_id = None
+
+        if add_new_area:
+            new_area_name = request.POST.get("new_area_name", "").strip()
+
+            if not new_area_name:
+                errors.append("Enter a name for the new area.")
+            else:
+                area_response = post(
+                    "/api/areas/",
+                    json={"name": new_area_name},
+                )
+
+                if area_response.status_code == 201:
+                    area_id = area_response.json()["id"]
+                else:
+                    try:
+                        errors.append(
+                            area_response.json().get(
+                                "message",
+                                "Could not create the area.",
+                            )
+                        )
+                    except ValueError:
+                        errors.append("Could not create the area.")
+        else:
+            area_id_value = request.POST.get("area_id", "").strip()
+
+            try:
+                area_id = int(area_id_value)
+            except (TypeError, ValueError):
+                errors.append("Select an area.")
+
+        if not name:
+            errors.append("Enter a cooling-centre name.")
+
+        if not location:
+            errors.append("Enter the centre location.")
+
+        if not errors:
+            centre_response = post(
+                "/api/centres/",
+                json={
+                    "name": name,
+                    "location": location,
+                    "status": status,
+                    "capacity": capacity,
+                    "area_id": area_id,
+                },
+            )
+
+            if centre_response.status_code == 201:
+                return redirect("cooling_centre_dashboard")
+
+            try:
+                errors.append(
+                    centre_response.json().get(
+                        "message",
+                        "Could not create the cooling centre.",
+                    )
+                )
+            except ValueError:
+                errors.append("Could not create the cooling centre.")
+
+        # Refresh the list so a newly-created area appears in the dropdown.
+        areas_response = get("/api/areas/")
+        areas = areas_response.json() if areas_response.ok else []
+
+    return render(
+        request,
+        "dashboard/cooling_centres/create.html",
+        {
+            "areas": areas,
+            "errors": errors,
+            "form_data": request.POST,
+        },
+    )
+
+
+def cooling_centre_details(request, centre_id):
+    """Display details of an individual cooling centre."""
+
+    centre = None
+    error = None
+
+    try:
+        response = get(f"/api/centres/{centre_id}")
+        response.raise_for_status()
+        centre = response.json()
+
+        areas_response = get("/api/areas/")
+        areas_response.raise_for_status()
+        areas = areas_response.json()
+
+        area_names = {area["id"]: area.get("name", "Unknown area") for area in areas}
+        centre["area_name"] = area_names.get(
+            centre.get("area_id"),
+            "Not specified",
+        )
+
+    except requests.HTTPError as exc:
+        logger.warning(
+            "Could not retrieve cooling centre %s: %s",
+            centre_id,
+            exc,
+        )
+
+        if exc.response is not None and exc.response.status_code == 404:
+            error = "Cooling centre not found."
+        else:
+            error = "Could not retrieve this cooling centre."
+
+    except requests.RequestException:
+        logger.warning(
+            "Flask API unavailable for cooling centre %s",
+            centre_id,
+            exc_info=True,
+        )
+        error = "The cooling centre service is currently unavailable."
+
+    return render(
+        request,
+        "dashboard/cooling_centres/details.html",
+        {
+            "centre_id": centre_id,
+            "centre": centre,
+            "error": error,
+        },
+    )
+
+
+def cooling_centre_edit(request, centre_id):
+    """Display and process the edit cooling centre form."""
+
+    errors = []
+    centre = None
+    areas = []
+
+    try:
+        response = get(f"/api/centres/{centre_id}")
+        response.raise_for_status()
+        centre = response.json()
+
+        areas_response = get("/api/areas/")
+        areas_response.raise_for_status()
+        areas = areas_response.json()
+
+    except requests.HTTPError as exc:
+        logger.warning(
+            "Could not retrieve cooling centre %s: %s",
+            centre_id,
+            exc,
+            exc_info=True,
+        )
+
+        if exc.response is not None and exc.response.status_code == 404:
+            return render(
+                request,
+                "dashboard/cooling-centre/edit.html",
+                {
+                    "centre_id": centre_id,
+                    "error": "Cooling centre not found.",
+                },
+                status=404,
+            )
+
+        errors.append("Could not retrieve the cooling centre.")
+
+    except requests.RequestException:
+        logger.warning(
+            "Flask API unavailable for cooling centre %s",
+            centre_id,
+            exc_info=True,
+        )
+        errors.append("The cooling centre service is currently unavailable.")
+
+    if request.method == "POST" and centre:
+        data = {
+            "name": request.POST.get("name", "").strip(),
+            "location": request.POST.get("location", "").strip(),
+            "status": request.POST.get("status", ""),
+            "capacity": request.POST.get("capacity", "").strip(),
+        }
+
+        add_new_area = request.POST.get("add_new_area") == "yes"
+        area_id_value = request.POST.get("area_id", "").strip()
+        new_area_name = request.POST.get("new_area_name", "").strip()
+
+        if not data["name"]:
+            errors.append("Enter a cooling-centre name.")
+
+        if not data["location"]:
+            errors.append("Enter the centre location.")
+
+        if data["status"] not in ["open", "closed"]:
+            errors.append("Select a valid status.")
+
+        try:
+            data["capacity"] = int(data["capacity"])
+            if data["capacity"] < 1:
+                raise ValueError
+        except (TypeError, ValueError):
+            errors.append("Enter a capacity of at least 1.")
+
+        if add_new_area:
+            if not new_area_name:
+                errors.append("Enter a name for the new area.")
+        else:
+            try:
+                data["area_id"] = int(area_id_value)
+            except (TypeError, ValueError):
+                errors.append("Select an area.")
+
+        # Only create the new area after the centre fields pass validation.
+        if not errors and add_new_area:
+            try:
+                area_response = post(
+                    "/api/areas/",
+                    json={"name": new_area_name},
+                )
+                area_response.raise_for_status()
+                data["area_id"] = area_response.json()["id"]
+
+            except requests.HTTPError:
+                logger.warning("Flask rejected the new area", exc_info=True)
+                errors.append("The new area could not be created.")
+
+            except (requests.RequestException, ValueError, KeyError):
+                logger.warning("Could not create the new area", exc_info=True)
+                errors.append("The area service is currently unavailable.")
+
+        if not errors:
+            try:
+                update_response = patch(
+                    f"/api/centres/{centre_id}",
+                    json=data,
+                )
+                update_response.raise_for_status()
+
+                return redirect("cooling_centre_details", centre_id=centre_id)
+
+            except requests.HTTPError:
+                logger.warning(
+                    "Flask rejected update for cooling centre %s",
+                    centre_id,
+                    exc_info=True,
+                )
+                errors.append("The cooling centre could not be updated.")
+
+            except requests.RequestException:
+                logger.warning(
+                    "Could not update cooling centre %s",
+                    centre_id,
+                    exc_info=True,
+                )
+                errors.append("The cooling centre service is currently unavailable.")
+
+        # Preserve submitted values when validation or saving fails.
+        centre.update(data)
+        centre["add_new_area"] = add_new_area
+        centre["new_area_name"] = new_area_name
+
+        # Reload areas in case a new area was created.
+        try:
+            areas_response = get("/api/areas/")
+            areas_response.raise_for_status()
+            areas = areas_response.json()
+        except requests.RequestException:
+            logger.warning("Could not reload areas", exc_info=True)
+
+    return render(
+        request,
+        "dashboard/cooling_centres/edit.html",
+        {
+            "centre": centre,
+            "areas": areas,
+            "errors": errors,
+        },
+    )

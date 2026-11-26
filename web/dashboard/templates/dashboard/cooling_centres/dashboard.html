@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Cooling Centres | HeatShield
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid px-3 px-md-5 py-4">
+    <!-- Page heading -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+      <div>
+        <h1 class="h3 mb-1">Cooling Centres</h1>
+        <p class="text-muted mb-0">View cooling-centre status and available capacity.</p>
+      </div>
+
+      <a href="{% url 'cooling_centre_create' %}" class="btn btn-primary">+ Create Cooling Centre</a>
+    </div>
+
+    <!-- Results heading -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h5 mb-0">Centre List</h2>
+      <span class="text-muted small">{{ centres|length }} centres shown</span>
+    </div>
+
+    <!-- Desktop table -->
+    <div class="card shadow-sm d-none d-md-block">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">Centre</th>
+              <th scope="col">Area</th>
+              <th scope="col">Location</th>
+              <th scope="col">Status</th>
+              <th scope="col">Capacity</th>
+              <th scope="col">Free Places</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for centre in centres %}
+              <tr>
+                <td class="fw-semibold">{{ centre.name }}</td>
+                <td>{{ centre.area_name|default:'Not assigned' }}</td>
+                <td>{{ centre.location }}</td>
+                <td>
+                  {% if centre.status == 'open' %}
+                    <span class="badge bg-success">Open</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Closed</span>
+                  {% endif %}
+                </td>
+                <td>{{ centre.capacity }}</td>
+                <td>{{ centre.free_places }}</td>
+
+                <td class="text-nowrap">
+                  <a href="{% url 'cooling_centre_details' centre.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                  <a href="{% url 'cooling_centre_edit' centre.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center py-5">
+                  <h3 class="h6 text-muted">No cooling centres found</h3>
+                  <p class="text-muted mb-0">Create a centre to see it listed here.</p>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="d-md-none">
+      {% for centre in centres %}
+        <div class="card shadow-sm mb-3">
+          <div class="card-body">
+            <!-- Centre name and status -->
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <h2 class="h6 fw-bold mb-0">{{ centre.name }}</h2>
+
+              {% if centre.status == 'open' %}
+                <span class="badge bg-success">Open</span>
+              {% else %}
+                <span class="badge bg-secondary">Closed</span>
+              {% endif %}
+            </div>
+
+            <!-- Centre details -->
+            <p class="text-muted small mb-3">{{ centre.area_name|default:'No area' }} &middot; {{ centre.location }}</p>
+
+            <!-- Capacity information -->
+            <div class="row g-2">
+              <div class="col-6">
+                <div class="border rounded p-2 h-100">
+                  <div class="text-muted small">Capacity</div>
+                  <div class="fw-semibold">{{ centre.capacity }}</div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="border rounded p-2 h-100">
+                  <div class="text-muted small">Free places</div>
+                  <div class="fw-semibold">{{ centre.free_places }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="card shadow-sm text-center py-5">
+          <h3 class="h6 text-muted">No cooling centres found</h3>
+          <p class="text-muted mb-0">Create a centre to see it listed here.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

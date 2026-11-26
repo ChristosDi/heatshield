@@ -3,6 +3,7 @@ from flask import Flask
 
 from .areas.routes import blp as areas_blp
 from .bookings.routes import blp as bookings_blp
+from .centres.routes import blp as centres_blp
 from .common.errors import register_error_handlers
 from .config import Config
 from .extensions import api, db, migrate
@@ -43,5 +44,6 @@ def create_app(test_config=None):
     api.register_blueprint(reports_blp)
     api.register_blueprint(residents_blp)
     api.register_blueprint(areas_blp)
+    api.register_blueprint(centres_blp)
 
     return app

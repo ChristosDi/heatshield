@@ -1,11 +1,11 @@
 """Services: booking management and capacity validation."""
 
 from sqlalchemy import text
-from ..extensions import db
-from .models import Booking
-from ..requests.models import SupportRequest
 from ..centres.models import CoolingCentre
+from ..extensions import db
+from ..requests.models import SupportRequest
 from .constants import ACTIVE_BOOKING_STATUSES
+from .models import Booking
 
 
 class CentreAvailabilityError(Exception):
