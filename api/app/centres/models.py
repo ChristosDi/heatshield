@@ -15,6 +15,10 @@ class CoolingCentre(db.Model):
     # Foreign Keys
     area_id = db.Column(db.Integer, db.ForeignKey("areas.id"), nullable=False)
 
+    # Relationships
+    area = db.relationship("Area", back_populates="cooling_centres", lazy="select")
+    bookings = db.relationship("Booking", back_populates="centre")
+
     # Note: 'free_places', 'accessibility_features' are dashed ovals (calculated/not stored)
     @property
     def free_places(self):

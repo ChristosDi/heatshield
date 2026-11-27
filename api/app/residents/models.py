@@ -10,4 +10,4 @@ class Resident(db.Model):
     postcode = db.Column(db.String(10), nullable=True)
 
     # Relationships
-    requests = db.relationship("SupportRequest", backref="resident", lazy=True)
+    requests = db.relationship("SupportRequest", back_populates="resident")
