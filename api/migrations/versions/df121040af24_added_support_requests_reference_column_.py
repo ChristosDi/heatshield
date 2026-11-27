@@ -18,6 +18,12 @@ depends_on = None
 
 
 def upgrade():
+    # Restore the reference column before populating existing records.
+    op.add_column(
+        "support_requests",
+        sa.Column("reference", sa.String(length=50), nullable=True)
+    )
+
     connection = op.get_bind()
 
     # Fill references for existing rows that don't have one yet.

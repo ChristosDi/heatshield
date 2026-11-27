@@ -1,10 +1,10 @@
-import datetime
+from datetime import UTC, datetime
 
 from ..extensions import db
 
 
 def utc_now():
-    return datetime.now(datetime.UTC)
+    return datetime.now(UTC)
 
 
 class Booking(db.Model):
