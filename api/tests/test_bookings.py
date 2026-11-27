@@ -379,3 +379,11 @@ def test_cancel_and_reactivate_booking(client, booking_data):
 
     booking = db.session.get(Booking, booking_id)
     assert booking.status == "cancelled"
+
+def test_reject_booking_with_missing_required_fields(client):
+    """Verify invalid booking input returns a JSON HTTP 400 error."""
+    response = client.post("/api/bookings/", json={})
+
+    assert response.status_code == 400
+    assert response.is_json
+    assert response.get_json()
