@@ -13,8 +13,8 @@ How the tests work:
 Run from the api/ folder with: python -m pytest tests/test_reports.py
 """
 import pytest
-
 from app.extensions import db
+
 # The three status groups are imported from the code itself, so the tests check the real rule.
 from app.reports.service import COMPLETED, OUTSTANDING, REJECTED
 from app.requests.constants import STATUSES
@@ -89,7 +89,7 @@ def test_counts_change_when_a_status_changes(client, app):
 
     # Arrange: create one request through the API. New requests start as "pending", so it is outstanding.
     created = client.post("/api/requests/", json={
-        "reference": "REQ-100",
+        # "reference": "REQ-100",
         "description": "Fictional request", 
         "category": "cooling_space",
         "resident_id": resident_id
@@ -98,7 +98,7 @@ def test_counts_change_when_a_status_changes(client, app):
     assert client.get(COUNTS_URL).get_json()["outstanding"] == 1
 
     # Act: a staff member marks the request as completed.
-    client.patch(f"/api/requests/{request_id}", json={"status": "completed"})
+    client.patch(f"/api/requests/id/{request_id}", json={"status": "completed"})
 
     # Assert: the counts are worked out on every call, never stored, so they change at once.
     counts = client.get(COUNTS_URL).get_json()

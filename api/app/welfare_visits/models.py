@@ -13,5 +13,5 @@ class WelfareVisit(db.Model):
     volunteer_id = db.Column(db.Integer, db.ForeignKey("volunteers.id"), nullable=False)
     request_id = db.Column(db.Integer, db.ForeignKey("support_requests.id"), nullable=False)
 
-    volunteer = db.relationship("Volunteer", backref=db.backref("welfare_visits", lazy=True))
-    request = db.relationship("SupportRequest", backref=db.backref("welfare_visits", lazy=True))
+    volunteer = db.relationship("Volunteer", back_populates="welfare_visits")
+    request = db.relationship("SupportRequest", back_populates="welfare_visits")

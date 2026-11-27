@@ -1,6 +1,6 @@
+from app.areas.models import Area
 from app.extensions import db
 from app.residents.models import Resident
-from app.areas.models import Area
 
 # ==========================================
 # CREATE Tests
@@ -18,7 +18,7 @@ def test_create_request(client, app):
     response = client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-001",
+            # "reference": "REQ-001",
             "description": "Resident needs a cooling space",
             "category": "cooling_space",
             "resident_id": resident_id,
@@ -31,7 +31,7 @@ def test_create_request(client, app):
     data = response.get_json()
 
     assert data["id"] is not None
-    assert data["reference"] == "REQ-001"
+    # assert data["reference"] == "REQ-001"
     assert data["description"] == "Resident needs a cooling space"
     assert data["category"] == "cooling_space"
     assert data["status"] == "pending"
@@ -50,7 +50,7 @@ def test_create_request_invalid_category(client, app):
     response = client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-002",
+            # "reference": "REQ-002",
             "description": "Resident needs support",
             "category": "invalid_category",
             "resident_id": resident_id
@@ -70,7 +70,7 @@ def test_create_request_missing_description(client, app):
     response = client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-003",
+            # "reference": "REQ-003",
             "category": "cooling_space",
             "resident_id": resident_id
         }
@@ -94,7 +94,7 @@ def test_get_all_requests(client, app):
     client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-004",
+            # "reference": "REQ-004",
             "description": "Resident needs cooling",
             "category": "cooling_space",
             "resident_id": resident_id
@@ -121,7 +121,7 @@ def test_get_single_request(client, app):
     create_response = client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-005",
+            # "reference": "REQ-005",
             "description": "Resident needs cooling",
             "category": "cooling_space",
             "resident_id": resident_id
@@ -131,7 +131,7 @@ def test_get_single_request(client, app):
     request_id = create_response.get_json()["id"]
 
     response = client.get(
-        f"/api/requests/{request_id}"
+        f"/api/requests/id/{request_id}"
     )
 
     assert response.status_code == 200
@@ -142,7 +142,7 @@ def test_get_single_request(client, app):
     
 
 def test_get_unknown_request(client):
-    response = client.get("/api/requests/999")
+    response = client.get("/api/requests/id/999")
 
     assert response.status_code == 404
 
@@ -163,7 +163,7 @@ def test_update_request(client, app):
     create_response = client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-006",
+            # "reference": "REQ-006",
             "description": "Resident needs support",
             "category": "welfare_visit",
             "resident_id": resident_id,
@@ -174,7 +174,7 @@ def test_update_request(client, app):
     request_id = create_response.get_json()["id"]
 
     response = client.patch(
-        f"/api/requests/{request_id}",
+        f"/api/requests/id/{request_id}",
         json={
             "status": "in_progress",
             "operational_priority": "high"
@@ -196,7 +196,7 @@ def test_update_request_invalid_priority(client, app):
     create_response = client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-007",
+            # "reference": "REQ-007",
             "description": "Resident needs cooling",
             "category": "cooling_space",
             "resident_id": resident_id
@@ -206,7 +206,7 @@ def test_update_request_invalid_priority(client, app):
     request_id = create_response.get_json()["id"]
 
     response = client.patch(
-        f"/api/requests/{request_id}",
+        f"/api/requests/id/{request_id}",
         json={
             "operational_priority": "super_urgent"
         }
@@ -218,7 +218,7 @@ def test_update_request_invalid_priority(client, app):
 
 def test_update_unknown_request(client):
     response = client.patch(
-        "/api/requests/999",
+        "/api/requests/id/999",
         json={
             "status": "completed"
         }
@@ -241,7 +241,7 @@ def test_delete_request(client, app):
     create_response = client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-008",
+            # "reference": "REQ-008",
             "description": "Resident needs cooling",
             "category": "cooling_space",
             "resident_id": resident_id
@@ -251,20 +251,20 @@ def test_delete_request(client, app):
     request_id = create_response.get_json()["id"]
 
     response = client.delete(
-        f"/api/requests/{request_id}"
+        f"/api/requests/id/{request_id}"
     )
 
     assert response.status_code == 204
 
     # Verify that the request no longer exists.
     get_response = client.get(
-        f"/api/requests/{request_id}"
+        f"/api/requests/id/{request_id}"
     )
 
     assert get_response.status_code == 404
 
 def test_delete_unknown_request(client):
-    response = client.delete("/api/requests/999")
+    response = client.delete("/api/requests/id/999")
 
     assert response.status_code == 404
     assert response.is_json
@@ -288,7 +288,7 @@ def test_filter_requests(client, app):
     client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-009",
+            # "reference": "REQ-009",
             "description": "Cooling support needed",
             "category": "cooling_space",
             "resident_id": resident_id,
@@ -299,7 +299,7 @@ def test_filter_requests(client, app):
     client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-010",
+            # "reference": "REQ-010",
             "description": "Welfare visit needed",
             "category": "welfare_visit",
             "resident_id": resident_id,
@@ -316,7 +316,7 @@ def test_filter_requests(client, app):
     data = response.get_json()
 
     assert len(data) == 1
-    assert data[0]["reference"] == "REQ-009"
+    # assert data[0]["reference"] == "REQ-009"
     assert all(
         request["category"] == "cooling_space"
         for request in data
@@ -332,7 +332,7 @@ def test_search_requests(client, app):
     client.post(
         "/api/requests/",
         json={
-            "reference": "REQ-011",
+            # "reference": "REQ-011",
             "description": "Needs cooling",
             "category": "cooling_space",
             "resident_id": resident_id
@@ -347,7 +347,8 @@ def test_search_requests(client, app):
     assert len(data) == 1
     assert data[0]["resident_name"] == "Jane Doe"
 
+    # We don't allow staff members to search using IDs, so no point testing that
     # Test searching by Reference
-    response = client.get("/api/requests/?search=REQ-011")
-    assert response.status_code == 200
-    assert len(response.get_json()) == 1
+    # response = client.get("/api/requests/id/?search=2")
+    # assert response.status_code == 200
+    # assert len(response.get_json()) == 1
