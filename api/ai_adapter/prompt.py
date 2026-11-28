@@ -20,3 +20,27 @@ Reply with one JSON object only, with exactly these keys:
 - "support_option": one short practical next step for staff
 
 Never give medical advice. Do not diagnose, name medicines or doses, or suggest treatment."""
+
+# The exact shape the AI must reply with, sent with every request. "strict" tells the service to follow it
+# exactly, so it can only use the allowed categories and priorities. Every answer is still checked anyway.
+FIELDS = ["summary", "missing_info", "medical_advice_flag", "suggested_category", "suggested_priority",
+          "rationale", "support_option"]
+
+RESPONSE_SCHEMA = {
+    "name": "triage_suggestion",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "summary": {"type": "string"},
+            "missing_info": {"type": "array", "items": {"type": "string"}},
+            "medical_advice_flag": {"type": "boolean"},
+            "suggested_category": {"type": "string", "enum": CATEGORIES},
+            "suggested_priority": {"type": "string", "enum": PRIORITIES},
+            "rationale": {"type": "string"},
+            "support_option": {"type": "string"},
+        },
+        "required": FIELDS,
+        "additionalProperties": False,
+    },
+}
