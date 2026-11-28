@@ -8,15 +8,6 @@ from .constants import CATEGORIES, PRIORITIES, STATUSES
 class RequestCreateSchema(Schema):
     """Schema for creating a new support request."""
 
-    # reference = fields.String(
-    #     required=True,
-    #     validate=validate.Length(min=1, max=50),
-    #     metadata={
-    #         "description": "Unique human-readable reference code for the request.",
-    #         "example": "REQ-2026-001"
-    #     }
-    # )
-
     description = fields.String(
         required=True,
         validate=validate.Length(min=1, max=2000),
@@ -145,12 +136,12 @@ class RequestResponseSchema(Schema):
         },
     )
 
-    # reference = fields.String(
-    #     metadata={
-    #         "description": "Unique human-readable reference code.",
-    #         "example": "REQ-2026-001"
-    #     }
-    # )
+    reference = fields.String(
+        metadata={
+            "description": "Unique human-readable reference code.",
+            "example": "HS-2026-001"
+        }
+    )
 
     description = fields.String(
         metadata={
@@ -265,7 +256,7 @@ class RequestFilterSchema(Schema):
 
     search = fields.String(
         metadata={
-            "description": "Search term to match against description, or resident name.",
+            "description": "Search term to match against description, reference, or resident name.",
             "example": "REQ-2026",
         }
     )

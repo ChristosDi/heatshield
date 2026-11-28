@@ -24,7 +24,7 @@
             <!-- Search -->
             <div class="col-12 col-md-6">
               <label for="search" class="form-label">Search requests</label>
-              <input type="text" name="search" id="search" class="form-control" placeholder="Search by ID, resident or description..." value="{{ request.GET.search|default:'' }}" />
+              <input type="text" name="search" id="search" class="form-control" placeholder="Search by Reference, resident or description..." value="{{ request.GET.search|default:'' }}" />
             </div>
 
             <!-- Category -->
@@ -95,7 +95,7 @@
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th scope="col">Request ID</th>
+              <th scope="col">Request Reference</th>
               <th scope="col">Resident</th>
               <th scope="col">Category</th>
               <th scope="col">Area</th>
@@ -109,7 +109,7 @@
           <tbody>
             {% for item in support_requests %}
               <tr>
-                <td class="fw-semibold">{{ item.id }}</td>
+                <td class="fw-semibold">{{ item.reference }}</td>
                 <td>{{ item.resident_name }}</td>
                 <td>
                   {% if item.category == 'cooling_space' %}Cooling space
@@ -134,9 +134,9 @@
                 <td>{{ item.created_at|date:'d M Y' }}</td>
                 <td>
                   <div class="d-flex gap-2">
-                    <a href="{% url 'request_detail' item.id %}" class="btn btn-sm btn-outline-primary">View</a>
-                    <a href="{% url 'request_edit' item.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                    <form method="POST" action="{% url 'request_delete' item.id %}" onsubmit="return confirm('Are you sure you want to delete this support request? This cannot be undone.');" class="d-inline">
+                    <a href="{% url 'request_detail' item.reference %}" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="{% url 'request_edit' item.reference %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <form method="POST" action="{% url 'request_delete' item.reference %}" onsubmit="return confirm('Are you sure you want to delete this support request? This cannot be undone.');" class="d-inline">
                       {% csrf_token %}
                       <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>
@@ -165,7 +165,7 @@
           <div class="card-body">
             <!-- Header: ID and Status -->
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="fw-bold text-primary">#{{ item.id }}</span>
+              <span class="fw-bold text-primary">#{{ item.reference }}</span>
               
               {% if item.status == 'pending' %}<span class="badge bg-secondary">Pending</span>
               {% elif item.status == 'in_progress' %}<span class="badge bg-warning text-dark">In Progress</span>
@@ -191,9 +191,9 @@
 
             <!-- Actions -->
             <div class="d-flex gap-2 mt-3 pt-3 border-top">
-              <a href="{% url 'request_detail' item.id %}" class="btn btn-sm btn-outline-primary flex-grow-1">View</a>
-              <a href="{% url 'request_edit' item.id %}" class="btn btn-sm btn-outline-secondary flex-grow-1">Edit</a>
-              <form method="POST" action="{% url 'request_delete' item.id %}" onsubmit="return confirm('Are you sure you want to delete this support request?');" class="flex-grow-1">
+              <a href="{% url 'request_detail' item.reference %}" class="btn btn-sm btn-outline-primary flex-grow-1">View</a>
+              <a href="{% url 'request_edit' item.reference %}" class="btn btn-sm btn-outline-secondary flex-grow-1">Edit</a>
+              <form method="POST" action="{% url 'request_delete' item.reference %}" onsubmit="return confirm('Are you sure you want to delete this support request?');" class="flex-grow-1">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
               </form>

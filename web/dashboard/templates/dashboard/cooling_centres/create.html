@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Create Cooling Centre | HeatShield
+{% endblock %}
+
+{% block content %}
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h3 mb-0">Create Cooling Centre</h1>
+      <a href="{% url 'cooling_centre_dashboard' %}" class="btn btn-outline-secondary">Back to centres</a>
+    </div>
+
+    {% for error in errors %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endfor %}
+
+    <form method="post" class="card border-0 shadow-sm">
+      {% csrf_token %}
+      <div class="card-body p-4">
+        <div class="mb-3">
+          <label for="name" class="form-label">Centre name</label>
+          <input id="name" name="name" type="text" maxlength="150" class="form-control" value="{{ form_data.name|default:'' }}" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="location" class="form-label">Location</label>
+          <input id="location" name="location" type="text" maxlength="200" class="form-control" value="{{ form_data.location|default:'' }}" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="area_id" class="form-label">Area</label>
+
+          <div id="existing-area-fields">
+            <select class="form-select" id="area_id" name="area_id">
+              <option value="">Select an existing area</option>
+
+              {% for area in areas %}
+                {% if form_data.area_id == area.id|stringformat:'s' %}
+                  <option value="{{ area.id }}" selected>{{ area.name }}</option>
+                {% else %}
+                  <option value="{{ area.id }}">{{ area.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <input type="hidden" name="add_new_area" id="add_new_area" value="no" />
+
+          <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="toggle-area">+ Add new area</button>
+
+          <div id="new-area-fields" class="border rounded p-3 mt-3" hidden>
+            <label for="new_area_name" class="form-label">New area name</label>
+            <input type="text" class="form-control" id="new_area_name" name="new_area_name" maxlength="100" value="{{ form_data.new_area_name|default:'' }}" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="capacity" class="form-label">Capacity</label>
+          <input id="capacity" name="capacity" type="number" min="1" class="form-control" value="{{ form_data.capacity|default:'' }}" required />
+          <div class="form-text">Enter the maximum number of people the centre can accommodate.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="status" class="form-label">Status</label>
+          <select id="status" name="status" class="form-select">
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create centre</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const toggleButton = document.getElementById('toggle-area')
+      const existingFields = document.getElementById('existing-area-fields')
+      const newFields = document.getElementById('new-area-fields')
+      const addNewArea = document.getElementById('add_new_area')
+      const areaSelect = document.getElementById('area_id')
+      const newAreaName = document.getElementById('new_area_name')
+    
+      toggleButton.addEventListener('click', function () {
+        const addingNew = addNewArea.value !== 'yes'
+    
+        if (addingNew) {
+          existingFields.hidden = true
+          newFields.hidden = false
+          areaSelect.required = false
+          newAreaName.required = true
+          addNewArea.value = 'yes'
+          toggleButton.textContent = 'Choose existing area instead'
+        } else {
+          existingFields.hidden = false
+          newFields.hidden = true
+          areaSelect.required = true
+          newAreaName.required = false
+          addNewArea.value = 'no'
+          toggleButton.textContent = '+ Add new area'
+        }
+      })
+    })
+  </script>
+{% endblock %}
