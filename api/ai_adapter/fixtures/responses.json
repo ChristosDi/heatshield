@@ -1,0 +1,61 @@
+{
+  "default": {
+    "summary": "A support request that staff need to read and triage by hand.",
+    "missing_info": ["What help the resident needs"],
+    "medical_advice_flag": false,
+    "suggested_category": "practical_assistance",
+    "suggested_priority": "normal",
+    "rationale": "The fake AI has no recorded answer for this description, so it gives this neutral default.",
+    "support_option": "Read the request and contact the resident to find out what they need."
+  },
+  "cases": [
+    {
+      "description": "My flat is too hot and I have nowhere cool to go this afternoon.",
+      "response": {
+        "summary": "Resident's flat is too hot and they have nowhere cool to go this afternoon.",
+        "missing_info": ["Can the resident travel to a cooling centre?", "Which area does the resident live in?"],
+        "medical_advice_flag": false,
+        "suggested_category": "cooling_space",
+        "suggested_priority": "high",
+        "rationale": "The resident needs somewhere cool today, so a cooling-centre place fits, and the short time makes it high priority.",
+        "support_option": "Offer a place at the nearest open cooling centre with free places."
+      }
+    },
+    {
+      "description": "My neighbour is 85, lives alone and has not been out of her flat for three hot days.",
+      "response": {
+        "summary": "An 85-year-old neighbour living alone has not left her flat for three hot days.",
+        "missing_info": ["Neighbour's area", "Has anyone spoken to her today?"],
+        "medical_advice_flag": false,
+        "suggested_category": "welfare_visit",
+        "suggested_priority": "urgent",
+        "rationale": "An older person alone during a heatwave is at high risk, so a welfare visit is needed as soon as possible.",
+        "support_option": "Arrange a welfare visit today."
+      }
+    },
+    {
+      "description": "I cannot carry bottled water home from the shop in this heat. Can someone bring some?",
+      "response": {
+        "summary": "Resident cannot carry bottled water home and asks for a delivery.",
+        "missing_info": ["Resident's area", "How much water is needed?"],
+        "medical_advice_flag": false,
+        "suggested_category": "practical_assistance",
+        "suggested_priority": "normal",
+        "rationale": "The resident needs practical help with water, and nothing in the request suggests immediate danger.",
+        "support_option": "Arrange a water delivery through practical assistance."
+      }
+    },
+    {
+      "description": "Which tablets should I take for heat exhaustion and how many?",
+      "response": {
+        "summary": "Resident asks which tablets to take for heat exhaustion and how many.",
+        "missing_info": ["Resident's area", "Is the resident unwell right now?"],
+        "medical_advice_flag": true,
+        "suggested_category": "practical_assistance",
+        "suggested_priority": "high",
+        "rationale": "The request asks for medicine and a dose, which staff must not advise on, and the resident may be unwell.",
+        "support_option": "Do not give medical advice. Tell the resident to call NHS 111, or 999 in an emergency."
+      }
+    }
+  ]
+}
