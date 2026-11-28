@@ -7,7 +7,6 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from urllib.error import HTTPError
 from unittest.mock import Mock
 
 import requests
@@ -28,14 +27,17 @@ def test_request_counts_returns_the_four_numbers(fake_flask):
 
 def test_calls_the_counts_route_on_the_configured_api_with_a_time_limit(fake_flask, settings):
     """Django calls the counts route at the address in FLASK_API_URL, and never waits forever."""
-    settings.FLASK_API_URL = "http://127.0.0.1:5001"
+    settings.FLASK_API_URL = "http://flask.example.test"
     fake_flask.answer(COUNTS)
 
     api_client.request_counts()
 
     assert fake_flask.calls == [
-        {"url": "http://127.0.0.1:5001/api/reports/request-counts", "timeout": api_client.TIMEOUT_SECONDS}
-    ]
+    {
+        "url": "http://flask.example.test/api/reports/request-counts",
+        "timeout": api_client.TIMEOUT_SECONDS,
+    }
+]
 
 
 def test_api_down_raises_api_unavailable():
@@ -43,10 +45,12 @@ def test_api_down_raises_api_unavailable():
     with pytest.raises(api_client.ApiUnavailable):
         api_client.request_counts()
 
-
 def test_http_error_from_the_api_raises_api_unavailable(fake_flask):
-    """An error status from Flask, such as 500, is not treated as counts."""
-    fake_flask.fail_with(HTTPError("http://fake", 500, "Server error", {}, None))
+    """An error status from Flask is not treated as counts."""
+    fake_flask.answer(
+        {"message": "Server error"},
+        status_code=500,
+    )
 
     with pytest.raises(api_client.ApiUnavailable):
         api_client.request_counts()
@@ -58,7 +62,6 @@ def test_answer_that_is_not_json_raises_api_unavailable(fake_flask):
 
     with pytest.raises(api_client.ApiUnavailable):
         api_client.request_counts()
-
 
 @pytest.mark.parametrize("bad_answer", [
     {"outstanding": 3, "completed": 3, "rejected": 1},              # total missing
@@ -93,7 +96,7 @@ def test_the_site_refuses_to_start_with_a_flask_address_that_is_not_http():
 
 def test_post_json_returns_decoded_response(monkeypatch, settings):
     """POST sends JSON and returns the decoded API response."""
-    settings.FLASK_API_URL = "http://127.0.0.1:5001"
+    settings.FLASK_API_URL = "http://flask.example.test"
 
     payload = {"request_id": 45}
     expected = {"id": 12, "status": "pending"}
@@ -113,10 +116,10 @@ def test_post_json_returns_decoded_response(monkeypatch, settings):
     assert result == expected
 
     mock_post.assert_called_once_with(
-        "http://127.0.0.1:5001/api/test/",
-        json=payload,
-        timeout=10,
-    )
+    "http://flask.example.test/api/test/",
+    json=payload,
+    timeout=10,
+)
 
     response.raise_for_status.assert_called_once()
 
@@ -162,3 +165,33 @@ def test_post_json_preserves_http_conflict(monkeypatch):
     assert error.value.response.json()["message"] == (
         "Cooling centre is full"
     )
+
+@pytest.mark.parametrize(
+    "method",
+    ["get", "post", "patch", "delete"],
+)
+def test_http_methods_use_configured_api(
+    monkeypatch, settings, method
+):
+    """Each HTTP method uses the configured URL and timeout."""
+    settings.FLASK_API_URL = "http://flask.example.test/"
+
+    response = Mock()
+    mock_method = Mock(return_value=response)
+
+    monkeypatch.setattr(
+        api_client.requests,
+        method,
+        mock_method,
+    )
+
+    client_method = getattr(api_client, method)
+
+    result = client_method("/api/test/", timeout=10)
+
+    mock_method.assert_called_once_with(
+        "http://flask.example.test/api/test/",
+        timeout=10,
+    )
+
+    assert result is response

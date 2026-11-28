@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from staff.roles import role_of
 
 from . import api_client
-from .api import delete, get, patch, post
+from .api_client import delete, get, patch, post
 from .constants import CATEGORIES, PRIORITIES, STATUSES
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,6 @@ def home(request):
         "dashboard/home.html",
         {"role": role_of(request.user), "counts": counts},
     )
-
 
 def request_dashboard(request):
     """Display and filter support requests."""
