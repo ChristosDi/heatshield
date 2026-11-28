@@ -3,9 +3,7 @@
 Django calls Flask from the server, so the browser never talks to Flask directly.
 Every answer is checked before a page uses it.
 """
-import json
-from urllib.error import URLError
-from urllib.request import urlopen
+
 
 import requests
 from django.conf import settings
@@ -19,14 +17,13 @@ COUNT_NAMES = ("outstanding", "completed", "rejected", "total")
 class ApiUnavailable(Exception):
     """The Flask API could not be reached, or sent an answer we can't use."""
 
-def get(path, **kwargs):
+def get(path, *, timeout=TIMEOUT_SECONDS, **kwargs):
     """Retrieve information from the Flask API."""
     return requests.get(
         f"{settings.FLASK_API_URL.rstrip('/')}{path}",
-        timeout=TIMEOUT_SECONDS,
+        timeout=timeout,
         **kwargs,
     )
-
 
 def post(path, *, timeout=TIMEOUT_SECONDS, **kwargs):
     """Submit information to the Flask API."""
@@ -36,32 +33,32 @@ def post(path, *, timeout=TIMEOUT_SECONDS, **kwargs):
         **kwargs,
     )
 
-
-def patch(path, **kwargs):
+def patch(path, *, timeout=TIMEOUT_SECONDS, **kwargs):
     """Update existing information through the Flask API."""
     return requests.patch(
         f"{settings.FLASK_API_URL.rstrip('/')}{path}",
-        timeout=TIMEOUT_SECONDS,
+        timeout=timeout,
         **kwargs,
     )
 
-
-def delete(path, **kwargs):
+def delete(path, *, timeout=TIMEOUT_SECONDS, **kwargs):
     """Delete information through the Flask API."""
     return requests.delete(
         f"{settings.FLASK_API_URL.rstrip('/')}{path}",
-        timeout=TIMEOUT_SECONDS,
+        timeout=timeout,
         **kwargs,
     )
 
 def get_json(path):
     """Ask the Flask API for a path and return its JSON answer."""
-    url = f"{settings.FLASK_API_URL}{path}"
     try:
-        with urlopen(url, timeout=TIMEOUT_SECONDS) as response:
-            return json.load(response)
-    except (URLError, TimeoutError, ValueError) as error:
-        raise ApiUnavailable(f"Could not get {path} from the Flask API") from error
+        response = get(path)
+        response.raise_for_status()
+        return response.json()
+    except (requests.RequestException, ValueError) as error:
+        raise ApiUnavailable(
+            f"Could not get {path} from the Flask API"
+        ) from error
 
 def post_json(path, payload, *, timeout=TIMEOUT_SECONDS):
     """Submit JSON to the Flask API and return its decoded answer."""
@@ -75,7 +72,6 @@ def post_json(path, payload, *, timeout=TIMEOUT_SECONDS):
         raise ApiUnavailable(
             f"Could not post to {path} on the Flask API"
         ) from error
-
 
 def request_counts():
     """Return the dashboard counts: outstanding, completed, rejected and total."""
